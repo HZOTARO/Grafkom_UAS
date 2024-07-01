@@ -1,86 +1,47 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-
+import { CharacterControls } from '../controls/characterControls';
 
 export class Character {
-    constructor(physicsWorld) {
-        this.physicsWorld = physicsWorld;
-        this.model = null;
-        this.mixer = null;
-        this.animationsMap = new Map(); // Initialize as a Map
-        this.characterControls = null;
-        this.loadModel();
-    }
+    constructor(scene, camera, orbitControls, physicalWorld, scale = 5, position = { x: 10, y: -2, z: 50 }, rotationY = Math.PI) {
+        this.scene = scene;
+        this.camera = camera;
+        this.orbitControls = orbitControls;
 
-    loadModel() {
-        const loader = new GLTFLoader();
-        loader.load('models/Soldier.glb', (gltf) => {
-            const model = gltf.scene;
-            model.traverse(function (object) {
-                if (object.isMesh) object.castShadow = true;
-            });
-            model.scale.set(5, 5, 5);
-            model.position.copy(this.position); // Adjust according to the provided position
-            scene.add(model);
-
-            this.model = model; // Save reference to the model
-            
-            // Extract animations and mixer
-            const animations = gltf.animations;
-            if (animations && animations.length > 0) {
-                this.mixer = new THREE.AnimationMixer(model);
-                animations.filter(a => a.name !== 'TPose').forEach((a) => {
-                    this.animationsMap.set(a.name, this.mixer.clipAction(a));
+        this.characterControlsPromise = new Promise((resolve, reject) => {
+            const loader = new GLTFLoader();
+            loader.load('../../asset/model/Character/Lumberjack.glb', (gltf) => {
+                const model = gltf.scene;
+                model.traverse((object) => {
+                    if (object.isMesh) object.castShadow = true;
                 });
-            }
+                model.scale.set(scale, scale, scale);
+                model.position.set(position.x, position.y, position.z);
+                model.rotation.y = rotationY;
 
-        }, undefined, (error) => {
-            console.error('An error occurred loading the GLTF:', error);
+                this.scene.add(model);
+
+                const gltfAnimations = gltf.animations;
+                const mixer = new THREE.AnimationMixer(model);
+                const animationsMap = new Map();
+                gltfAnimations.filter(a => a.name !== 'A-Pose').forEach((a) => {
+                    animationsMap.set(a.name, mixer.clipAction(a));
+                });
+
+                if (!this.orbitControls) {
+                    console.error('OrbitControls is undefined');
+                    reject('OrbitControls is undefined');
+                    return;
+                }
+
+                const characterControls = new CharacterControls(model, mixer, animationsMap, this.orbitControls, this.camera, 'Poses');
+                console.log('CharacterControls initialized', characterControls);
+                resolve(characterControls);
+            }, undefined, (error) => {
+                console.error('An error occurred loading the character model:', error);
+                reject(error);
+            });
         });
-    }
-
-    addPhysics() {
-        if (!this.model) {
-            console.error('Model not found, cannot add physics.');
-            return;
-        }
-
-        const box = new THREE.Box3().setFromObject(this.model);
-        const boxSize = new THREE.Vector3();
-        box.getSize(boxSize);
-
-        const halfExtents = new Ammo.btVector3(boxSize.x * 0.5, boxSize.y * 0.5, boxSize.z * 0.5);
-        const transform = new Ammo.btTransform();
-        transform.setIdentity();
-        transform.setOrigin(new Ammo.btVector3(this.position.x, this.position.y + (boxSize.y * 0.5), this.position.z));
-
-        const mass = 10; // Example: character with mass
-        const localInertia = new Ammo.btVector3(0, 0, 0);
-        const shape = new Ammo.btBoxShape(halfExtents);
-        shape.calculateLocalInertia(mass, localInertia);
-
-        const motionState = new Ammo.btDefaultMotionState(transform);
-        const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-        const body = new Ammo.btRigidBody(rbInfo);
-
-        this.physicsWorld.addRigidBody(body);
-        this.physicsBody = body;
-
-        console.log('Character physics body added to physics world:', this.physicsBody);
-    }
-
-    update(deltaTime) {
-        if (!this.model || !this.physicsBody) return;
-
-        const ms = this.physicsBody.getMotionState();
-        if (ms) {
-            const transform = new Ammo.btTransform();
-            ms.getWorldTransform(transform);
-            const position = transform.getOrigin();
-            const quaternion = transform.getRotation();
-
-            this.model.position.set(position.x(), position.y(), position.z());
-            this.model.quaternion.set(quaternion.x(), quaternion.y(), quaternion.z(), quaternion.w());
-        }
+        
     }
 }

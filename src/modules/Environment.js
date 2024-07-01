@@ -4,12 +4,9 @@ import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockCont
 import { physicsWorld, setupPhysicalWorld } from './Physics.js';
 import { camera } from './Camera.js';
 import { scene } from './Scene.js';
-import { Platform } from '../generation/Platform.js';
-import { Player } from '../generation/Player.js';
-import { Tree, generateTrees } from '../generation/tree.js'
-import { CharacterControls } from '../controls/characterControls.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { KeyDisplay } from '../utils/utils.js';
+import { Character } from '../generation/Character.js';
+import { Platform } from '../generation/Platform.js';
 
 export class Environment {
     constructor() {
@@ -29,13 +26,51 @@ export class Environment {
         this.setupControls();
         this.setupLighting();
         this.createButtons();
-        this.createGround();
-        this.generateCharacter();
-        generateTrees(scene, 10000, 1);
 
+        this.runGeneration();
         this.initEventListeners();
         this.animate();
     }
+
+    runGeneration() {
+        this.createGround();
+        // this.platform = new Platform(this.scene, physicsWorld);
+        this.character = new Character(this.scene, this.camera, this.orbitControls, this.physicsWorld);
+        // Move the assignment of characterControls inside the callback of Character's constructor
+        // to ensure it's assigned only after initialization is complete.
+        this.character.characterControlsPromise.then((controls) => {
+            this.characterControls = controls;
+            console.log('CharacterControls initialized', this.characterControls);
+        }).catch((error) => {
+            console.error('Failed to initialize character controls:', error);
+        });
+
+    }
+
+    animate() {
+        requestAnimationFrame(this.animate.bind(this));
+        const delta = this.clock.getDelta();
+
+        console.log(this.characterControls);
+
+        if (this.physicsWorld) {
+            this.physicsWorld.stepSimulation(delta, 10);
+        }
+
+        if (this.isFlying) {
+            this.handleFlyControls(delta);
+        } else {
+            if (this.characterControls) {
+                this.characterControls.update(delta, this.keysPressed);
+            }
+            this.orbitControls.update();
+        }
+
+        // this.character.update(delta);
+
+        this.renderer.render(this.scene, this.camera);
+    }
+    
 
     setupRenderer() {
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -125,32 +160,6 @@ export class Environment {
         });
     }
 
-    generateCharacter() {
-        const loader = new GLTFLoader();
-        loader.load('../../asset/model/Character/Lumberjack.glb', (gltf) => {
-            const model = gltf.scene;
-            model.traverse((object) => {
-                if (object.isMesh) object.castShadow = true;
-            });
-            model.scale.set(5, 5, 5);
-            model.position.set(10, -2, 50);
-            model.rotation.y = Math.PI; // Rotate model 180 degrees
-
-            this.scene.add(model);
-
-            const gltfAnimations = gltf.animations;
-            const mixer = new THREE.AnimationMixer(model);
-            const animationsMap = new Map();
-            gltfAnimations.filter(a => a.name !== 'A-Pose').forEach((a) => {
-                animationsMap.set(a.name, mixer.clipAction(a));
-            });
-
-            this.characterControls = new CharacterControls(model, mixer, animationsMap, this.orbitControls, this.camera, 'Idle');
-        }, undefined, (error) => {
-            console.error('An error occurred loading the character model:', error);
-        });
-    }
-
     initEventListeners() {
         document.addEventListener('keydown', (event) => {
             this.keyDisplayQueue.down(event.key);
@@ -184,25 +193,7 @@ export class Environment {
         }
     }
 
-    animate() {
-        requestAnimationFrame(this.animate.bind(this));
-        const delta = this.clock.getDelta();
 
-        if (this.physicsWorld) {
-            this.physicsWorld.stepSimulation(delta, 10);
-        }
-
-        if (this.isFlying) {
-            this.handleFlyControls(delta);
-        } else {
-            if (this.characterControls) {
-                this.characterControls.update(delta, this.keysPressed);
-            }
-            this.orbitControls.update();
-        }
-
-        this.renderer.render(this.scene, this.camera);
-    }
 
     handleFlyControls(delta) {
         const velocity = new THREE.Vector3();
@@ -217,4 +208,5 @@ export class Environment {
         this.flyControls.getObject().translateY(velocity.y * delta);
         this.flyControls.getObject().translateZ(velocity.z * delta);
     }
+
 }
