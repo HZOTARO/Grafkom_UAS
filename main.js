@@ -6,27 +6,43 @@ import { Camp } from './Objects/camp.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { Scene } from "./modules/scene.js";
+import { scene } from './modules/scene.js';
+import { setupPhysicsWorld, physicsWorld, updatePhysics } from './modules/physics.js';
+import { camera } from './modules/camera.js';
 
+let renderer, orbitControls, flyControls;
+let characterControls, isFlying = false;
+const keysPressed = {};
+const keyDisplayQueue = new KeyDisplay();
+const clock = new THREE.Clock();
 
-// Inisialisasi Ammo.js
-Ammo().then(start);
+function init() {
+    Ammo().then(() => {
+        setupRenderer();
+        setupControls();
+        setupLighting();
+        createButtons();
+        createGround();
+        generateCharacter();
+        generateParrot();
+        initEventListeners();
+        generateTrees(scene, 5000, 1);
+        new Camp(scene, 20, {x: 0, y: 5.5, z: 0}, physicsWorld);
+        setupPhysicsWorld();
+        start();
+    });
+}
 
-
-
-function start(Ammo) {
-
-
-
-
-    const renderer = new THREE.WebGLRenderer();
+function setupRenderer() {
+    renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
     document.body.appendChild(renderer.domElement);
+}
 
-    const orbitControls = new OrbitControls(camera, renderer.domElement);
+function setupControls() {
+    orbitControls = new OrbitControls(camera, renderer.domElement);
     orbitControls.enableDamping = true;
     orbitControls.minDistance = 10;
     orbitControls.maxDistance = 20;
@@ -34,58 +50,11 @@ function start(Ammo) {
     orbitControls.maxPolarAngle = Math.PI / 2 - 0.05; // prevent camera below ground
     orbitControls.minPolarAngle = Math.PI / 6;        // prevent top down view
     orbitControls.update();
+    
+    flyControls = new PointerLockControls(camera, document.body);
+}
 
-    particleFire.install( { THREE: THREE } );
-
-    var fireRadius = 0.5;
-    var fireHeight = 4;
-    var particleCount = 5000;
-    var geometry0 = new particleFire.Geometry( fireRadius, fireHeight, particleCount );
-    var material0 = new particleFire.Material( { color: 0xff2200 } );
-    material0.setPerspective( camera.fov, window.innerHeight );
-    var particleFireMesh0 = new THREE.Points( geometry0, material0 );
-    // particleFireMesh0.scale.set(5, 5 , 5);
-    particleFireMesh0.position.set(0, 0, 40);
-    scene.add( particleFireMesh0 );
-
-    var geometry1 = new particleFire.Geometry( 0.5, 1, 250 );
-var material1 = new particleFire.Material( { color: 0x22ff00 } );
-material1.setPerspective( camera.fov, window.innerHeight );
-var particleFireMesh1 = new THREE.Points( geometry1, material1 );
-particleFireMesh1.position.set( 5, 0, 50 );
-scene.add( particleFireMesh1 );
-
-    const flyControls = new PointerLockControls(camera, document.body);
-    let isFlying = false;
-
-    function toggleMode(mode) {
-        if (mode === 'fly') {
-            isFlying = true;
-            flyControls.lock();
-            orbitControls.enabled = false;
-        } else if (mode === 'walk') {
-            isFlying = false;
-            flyControls.unlock();
-            orbitControls.enabled = true;
-        }
-    }
-
-    const flyBtn = document.createElement('button');
-    flyBtn.innerText = 'Fly Mode (F)';
-    flyBtn.style.position = 'absolute';
-    flyBtn.style.top = '10px';
-    flyBtn.style.left = '10px';
-    flyBtn.addEventListener('click', () => toggleMode('fly'));
-    document.body.appendChild(flyBtn);
-
-    const walkBtn = document.createElement('button');
-    walkBtn.innerText = 'Walk Mode (G)';
-    walkBtn.style.position = 'absolute';
-    walkBtn.style.top = '10px';
-    walkBtn.style.left = '120px';
-    walkBtn.addEventListener('click', () => toggleMode('walk'));
-    document.body.appendChild(walkBtn);
-
+function setupLighting() {
     const ambientLight = new THREE.AmbientLight(0x555555);
     scene.add(ambientLight);
 
@@ -93,51 +62,61 @@ scene.add( particleFireMesh1 );
     directionalLight.position.set(100, 100, 100).normalize();
     directionalLight.castShadow = true;
     scene.add(directionalLight);
+}
 
-    directionalLight.shadow.mapSize.width = 1024;
-    directionalLight.shadow.mapSize.height = 1024;
-    directionalLight.shadow.camera.near = 0.5;
-    directionalLight.shadow.camera.far = 500;
+function createButtons() {
+    const flyBtn = createButton('Fly Mode (F)', '10px', '10px', () => toggleMode('fly'));
+    const walkBtn = createButton('Walk Mode (G)', '10px', '120px', () => toggleMode('walk'));
+    document.body.appendChild(flyBtn);
+    document.body.appendChild(walkBtn);
+}
 
-    function createGround() {
-        const groundGeo = new THREE.PlaneGeometry(5000, 5000, 1000, 1000);
+function createButton(innerText, top, left, onClick) {
+    const button = document.createElement('button');
+    button.innerText = innerText;
+    button.style.position = 'absolute';
+    button.style.top = top;
+    button.style.left = left;
+    button.addEventListener('click', onClick);
+    return button;
+}
 
-        const textureLoader = new THREE.TextureLoader();
-        textureLoader.setPath("./heightmap/");
+function createGround() {
+    const groundGeo = new THREE.PlaneGeometry(5000, 5000, 1000, 1000);
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.setPath("./heightmap/");
 
-        textureLoader.load("grass_texture.png", texture => {
-            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set(50, 50);
+    textureLoader.load("grass_texture.png", texture => {
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(50, 50);
 
-            textureLoader.load("terrain_texture.png", dispTexture => {
-                dispTexture.wrapS = dispTexture.wrapT = THREE.RepeatWrapping;
-                dispTexture.repeat.set(1, 1);
+        textureLoader.load("terrain_texture.png", dispTexture => {
+            dispTexture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            dispTexture.repeat.set(1, 1);
 
-                const groundMat = new THREE.MeshStandardMaterial({
-                    color: 0xffffff,
-                    map: texture,
-                    displacementMap: dispTexture,
-                    displacementScale: 200,
-                });
-
-                const groundMesh = new THREE.Mesh(groundGeo, groundMat);
-                groundMesh.rotation.x = -Math.PI / 2;
-                groundMesh.position.y = -3;
-                groundMesh.receiveShadow = true;
-                scene.add(groundMesh);
-
-            }, undefined, err => {
-                console.error('An error occurred loading the displacement texture:', err);
+            const groundMat = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                map: texture,
+                displacementMap: dispTexture,
+                displacementScale: 200,
             });
 
+            const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+            groundMesh.rotation.x = -Math.PI / 2;
+            groundMesh.position.y = -3;
+            groundMesh.receiveShadow = true;
+            scene.add(groundMesh);
+
         }, undefined, err => {
-            console.error('An error occurred loading the diffuse texture:', err);
+            console.error('An error occurred loading the displacement texture:', err);
         });
-    }
 
-    createGround();
+    }, undefined, err => {
+        console.error('An error occurred loading the diffuse texture:', err);
+    });
+}
 
-    let characterControls;
+function generateCharacter() {
     new GLTFLoader().load('models/Soldier.glb', function (gltf) {
         const model = gltf.scene;
         model.traverse(function (object) {
@@ -156,7 +135,9 @@ scene.add( particleFireMesh1 );
 
         characterControls = new CharacterControls(model, mixer, animationsMap, orbitControls, camera, 'Idle');
     });
+}
 
+function generateParrot() {
     new GLTFLoader().load('models/Parrot.glb', function (gltf) {
         const model = gltf.scene;
         model.traverse(function (object) {
@@ -165,20 +146,17 @@ scene.add( particleFireMesh1 );
         model.scale.set(0.1, 0.1, 0.1);
         model.position.set(0, 5, 50);
         scene.add(model);
-    
+
         const gltfAnimations = gltf.animations;
         const mixer = new THREE.AnimationMixer(model);
-    
+
         // Menemukan dan memainkan animasi terbang
         const flyAction = mixer.clipAction(gltf.animations[0]); // Ganti [0] dengan indeks animasi terbang yang sesuai
         flyAction.play();
-    
-        // Set camera position and lookAt target
-    
     });
-    
-    const keysPressed = {};
-    const keyDisplayQueue = new KeyDisplay();
+}
+
+function initEventListeners() {
     document.addEventListener('keydown', (event) => {
         keyDisplayQueue.down(event.key);
         if (event.shiftKey && characterControls) {
@@ -192,70 +170,66 @@ scene.add( particleFireMesh1 );
             }
         }
     }, false);
+
     document.addEventListener('keyup', (event) => {
         keyDisplayQueue.up(event.key);
         keysPressed[event.key.toLowerCase()] = false;
     }, false);
+}
 
-    generateTrees(scene, 5000, 1);
+function toggleMode(mode) {
+    if (mode === 'fly') {
+        isFlying = true;
+        flyControls.lock();
+        orbitControls.enabled = false;
+    } else if (mode === 'walk') {
+        isFlying = false;
+        flyControls.unlock();
+        orbitControls.enabled = true;
+    }
+}
 
-    // Load skybox textures
-    const cubeTextureLoader = new THREE.CubeTextureLoader();
-    cubeTextureLoader.setPath('./skybox/'); // Path to your skybox textures
-
-    const skyboxTexture = cubeTextureLoader.load([
-        'px.png', 'nx.png', // Right, Left
-        'py.png', 'ny.png', // Top, Bottom
-        'pz.png', 'nz.png'  // Front, Back
-    ]);
-
-    // Apply the loaded texture as the scene background
-    scene.background = skyboxTexture;
-
-    // Inisialisasi dunia fisika
-    const collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
-    const dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration);
-    const broadphase = new Ammo.btDbvtBroadphase();
-    const solver = new Ammo.btSequentialImpulseConstraintSolver();
-    const physicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
-    physicsWorld.setGravity(new Ammo.btVector3(0, -9.81, 0));
-
-    new Camp(scene, 20, {x: 0, y: 5.5, z: 0}, physicsWorld);
-
-    const clock = new THREE.Clock();
+function start() {
     function animate() {
         const delta = clock.getDelta();
-
-
-        physicsWorld.stepSimulation(delta, 10);
+        updatePhysics(delta);
 
         if (isFlying) {
-            const velocity = new THREE.Vector3();
-            if (keysPressed['w']) velocity.z -= 5000.0 * delta;
-            if (keysPressed['s']) velocity.z += 5000.0 * delta;
-            if (keysPressed['a']) velocity.x -= 5000.0 * delta;
-            if (keysPressed['d']) velocity.x += 5000.0 * delta;
-            if (keysPressed[' ']) velocity.y += 5000.0 * delta;
-            if (keysPressed['shift']) velocity.y -= 5000 * delta;
-
-            flyControls.getObject().translateX(velocity.x * delta);
-            flyControls.getObject().translateY(velocity.y * delta);
-            flyControls.getObject().translateZ(velocity.z * delta);
+            handleFlyControls(delta);
         } else {
-            if (characterControls) {
-                characterControls.update(delta, keysPressed);
-            }
+            handleCharacterControls(delta);
             orbitControls.update();
         }
 
-        
-
         renderer.render(scene, camera);
 
-        particleFireMesh0.material.update( delta * 0.75 );
-        particleFireMesh1.material.update( delta );
+        // Assuming particleFireMesh0 and particleFireMesh1 are defined elsewhere
+        // particleFireMesh0.material.update(delta * 0.75);
+        // particleFireMesh1.material.update(delta);
         requestAnimationFrame(animate);
     }
 
     animate();
 }
+
+function handleFlyControls(delta) {
+    const velocity = new THREE.Vector3();
+    if (keysPressed['w']) velocity.z -= 5000.0 * delta;
+    if (keysPressed['s']) velocity.z += 5000.0 * delta;
+    if (keysPressed['a']) velocity.x -= 5000.0 * delta;
+    if (keysPressed['d']) velocity.x += 5000.0 * delta;
+    if (keysPressed[' ']) velocity.y += 5000.0 * delta;
+    if (keysPressed['shift']) velocity.y -= 5000 * delta;
+
+    flyControls.getObject().translateX(velocity.x * delta);
+    flyControls.getObject().translateY(velocity.y * delta);
+    flyControls.getObject().translateZ(velocity.z * delta);
+}
+
+function handleCharacterControls(delta) {
+    if (characterControls) {
+        characterControls.update(delta, keysPressed);
+    }
+}
+
+init();
