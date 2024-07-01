@@ -1,0 +1,45 @@
+import * as THREE from 'three';
+import Ammo from 'ammo.js';
+
+export class Wall {
+    constructor(scene, physicsWorld) {
+        this.scene = scene;
+        this.physicsWorld = physicsWorld;
+
+        // Three.js Mesh
+        const geometry = new THREE.BoxGeometry(2, 20, 20);
+        const material = new THREE.MeshPhongMaterial({ color: 0x808080 });
+        this.mesh = new THREE.Mesh(geometry, material);
+        this.mesh.position.set(10, -0.5, 0);
+        this.mesh.castShadow = true;  // Enable casting shadows
+        this.mesh.receiveShadow = true;  // Enable receiving shadows
+        this.mesh.visible = false;
+        scene.add(this.mesh);
+
+        // Ammo.js Physics
+        const transform = new Ammo.btTransform();
+        transform.setIdentity();
+        transform.setOrigin(new Ammo.btVector3(10, -0.5, 0));
+        const motionState = new Ammo.btDefaultMotionState(transform);
+
+        const colShape = new Ammo.btBoxShape(new Ammo.btVector3(1, 10, 10));
+        const localInertia = new Ammo.btVector3(0, 0, 0);
+        colShape.calculateLocalInertia(0, localInertia);
+
+        const rbInfo = new Ammo.btRigidBodyConstructionInfo(0, motionState, colShape, localInertia);
+        this.body = new Ammo.btRigidBody(rbInfo);
+
+        // Set collision flags to make the wall non-physics-penetrable
+        this.body.setCollisionFlags(this.body.getCollisionFlags() | Ammo.btCollisionObject.CF_STATIC_OBJECT);
+
+        // Set collision group and mask
+        const group = 1 << 1; // group 2 (binary: 10)
+        const mask = -1 ^ (1 << 1); // collide with all except group 2
+
+        physicsWorld.addRigidBody(this.body, group, mask);
+    }
+
+    update(delta) {
+        // Add any updates to the platform here if needed
+    }
+}
