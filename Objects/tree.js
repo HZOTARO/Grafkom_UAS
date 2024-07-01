@@ -29,13 +29,13 @@ export class Tree {
 
 export function generateTrees(scene, gridSize, scale) {
     const trees = [];
-    const spacing = 300; // Jarak antar pohon
-    const exclusionRadius = 380; // Radius untuk menghindari generate pohon di sekitar (0,0)
+    const spacing = 150; // Jarak antar pohon
+    const exclusionRadius = 100; // Radius untuk menghindari generate pohon di sekitar (0,0)
 
     for (let x = -gridSize / 2; x <= gridSize / 2; x += spacing) {
         for (let z = -gridSize / 2; z <= gridSize / 2; z += spacing) { 
             if (Math.sqrt(x * x + z * z) > exclusionRadius) {
-                const position = new THREE.Vector3(x, 0, z);
+                const position = new THREE.Vector3(x, -2, z);
                 const tree = new Tree(scene, scale, position);
                 trees.push(tree);
             }
