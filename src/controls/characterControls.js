@@ -40,29 +40,29 @@ export class CharacterControls {
 
     update(delta, keysPressed) {
         const directionPressed = DIRECTIONS.some(key => keysPressed[key] === true);
-
+    
         let play = '';
         if (directionPressed && this.toggleRun) {
             play = 'Walk';
         } else if (directionPressed) {
             play = 'Walk';
         } else {
-            play = 'Poses';
+            play = 'Poses'; // Memilih 'Poses' ketika tidak ada tombol arah yang ditekan
         }
-
+    
         if (this.currentAction !== play) {
             const toPlay = this.animationsMap.get(play);
             const current = this.animationsMap.get(this.currentAction);
-
+    
             // current.fadeOut(this.fadeDuration);
             toPlay.reset().fadeIn(this.fadeDuration).play();
-
+    
             this.currentAction = play;
         }
-
+    
         this.mixer.update(delta);
-
-        if (this.currentAction === 'Walk' || this.currentAction === 'Walk') {
+    
+        if (this.currentAction === 'Walk') { // atau this.currentAction === 'Walk'
             // calculate towards camera direction
             const angleYCameraDirection = Math.atan2(
                 (this.camera.position.x - this.model.position.x), 
@@ -70,23 +70,23 @@ export class CharacterControls {
             );
             // diagonal movement angle offset
             const directionOffset = this.directionOffset(keysPressed);
-
+    
             // rotate model
             this.rotateQuarternion.setFromAxisAngle(this.rotateAngle, angleYCameraDirection + directionOffset);
             this.model.quaternion.rotateTowards(this.rotateQuarternion, 0.2);
-
+    
             // calculate direction
             this.camera.getWorldDirection(this.walkDirection);
             this.walkDirection.y = 0;
             this.walkDirection.normalize();
             this.walkDirection.applyAxisAngle(this.rotateAngle, directionOffset);
-
+    
             // run/walk velocity
-            const velocity = this.currentAction === 'Walk' ? this.runVelocity : this.walkVelocity;
-
+            const velocity = this.toggleRun ? this.runVelocity : this.walkVelocity;
+    
             // move model & camera
-            const moveX = this.walkDirection.x * velocity * delta;
-            const moveZ = this.walkDirection.z * velocity * delta;
+            const moveX = -this.walkDirection.x * velocity * delta;
+            const moveZ = -this.walkDirection.z * velocity * delta;
             this.model.position.x += moveX;
             this.model.position.z += moveZ;
             this.updateCameraTarget(moveX, moveZ);
@@ -108,23 +108,23 @@ export class CharacterControls {
     directionOffset(keysPressed) {
         let directionOffset = 0; // w
 
-        if (keysPressed[W]) {
-            if (keysPressed[A]) {
+        if (keysPressed[S]) {
+            if (keysPressed[D]) {
                 directionOffset = Math.PI / 4; // w+a
-            } else if (keysPressed[D]) {
+            } else if (keysPressed[A]) {
                 directionOffset = -Math.PI / 4; // w+d
             }
-        } else if (keysPressed[S]) {
-            if (keysPressed[A]) {
+        } else if (keysPressed[W]) {
+            if (keysPressed[D]) {
                 directionOffset = Math.PI / 4 + Math.PI / 2; // s+a
-            } else if (keysPressed[D]) {
+            } else if (keysPressed[A]) {
                 directionOffset = -Math.PI / 4 - Math.PI / 2; // s+d
             } else {
                 directionOffset = Math.PI; // s
             }
-        } else if (keysPressed[A]) {
-            directionOffset = Math.PI / 2; // a
         } else if (keysPressed[D]) {
+            directionOffset = Math.PI / 2; // a
+        } else if (keysPressed[A]) {
             directionOffset = -Math.PI / 2; // d
         }
 
