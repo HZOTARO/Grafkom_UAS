@@ -5,8 +5,10 @@ import { physicsWorld, setupPhysicalWorld } from './Physics.js';
 import { camera } from './Camera.js';
 import { scene } from './Scene.js';
 import { KeyDisplay } from '../utils/utils.js';
-import { Character } from '../generation/Character.js';
+import { Character } from '../generation/character.js';
 import { Platform } from '../generation/Platform.js';
+import { generateTrees } from '../generation/tree.js';
+import { Light } from '../utils/lighting.js';
 
 export class Environment {
     constructor() {
@@ -34,6 +36,7 @@ export class Environment {
 
     runGeneration() {
         this.createGround();
+        generateTrees(this.scene,500,1);
         // this.platform = new Platform(this.scene, physicsWorld);
         this.character = new Character(this.scene, this.camera, this.orbitControls, this.physicsWorld);
         // Move the assignment of characterControls inside the callback of Character's constructor
@@ -95,24 +98,33 @@ export class Environment {
     }
 
     setupLighting() {
-        const ambientLight = new THREE.AmbientLight(0x404040);
-        this.scene.add(ambientLight);
+        this.light = new Light(scene);
+        this.light.createAmbientLight(0.8);
+        this.light.createHemisphericLight(0x87CEEB, 0x444444, 0.6);
+        // this.scene.add(this.light.ambientLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(1, 1, 1).normalize();
-        directionalLight.castShadow = true;
-        directionalLight.shadow.mapSize.width = 2048;
-        directionalLight.shadow.mapSize.height = 2048;
-        directionalLight.shadow.camera.near = 0.5;
-        directionalLight.shadow.camera.far = 500;
-        this.scene.add(directionalLight);
+        // const ambientLight = new THREE.AmbientLight(0x404040);
+        // this.scene.add(ambientLight);
+
+        // const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        // directionalLight.position.set(1, 1, 1).normalize();
+        // directionalLight.castShadow = true;
+        // directionalLight.shadow.mapSize.width = 2048;
+        // directionalLight.shadow.mapSize.height = 2048;
+        // directionalLight.shadow.camera.near = 0.5;
+        // directionalLight.shadow.camera.far = 500;
+        // this.scene.add(directionalLight);
     }
 
     createButtons() {
         const flyBtn = this.createButton('Fly Mode (F)', '10px', '10px', () => this.toggleMode('fly'));
         const walkBtn = this.createButton('Walk Mode (G)', '10px', '120px', () => this.toggleMode('walk'));
+        const dayBtn = this.createButton('Day Mode', '10px', '250px', () => this.setDayMode());
+        const nightBtn = this.createButton('Night Mode', '10px', '350px', () => this.setNightMode());
         document.body.appendChild(flyBtn);
         document.body.appendChild(walkBtn);
+        document.body.appendChild(dayBtn);
+        document.body.appendChild(nightBtn);
     }
 
     createButton(innerText, top, left, onClick) {
@@ -207,6 +219,20 @@ export class Environment {
         this.flyControls.getObject().translateX(velocity.x * delta);
         this.flyControls.getObject().translateY(velocity.y * delta);
         this.flyControls.getObject().translateZ(velocity.z * delta);
+    }
+
+    setDayMode() {
+        this.scene.background = new THREE.Color(0x87CEEB);
+        this.light.setAmbientLightIntensity(0.8);
+        this.light.setHemisphericLightIntensity(0.6);
+        this.light.setHemisphericLightColors(0x87CEEB, 0x444444);
+    }
+
+    setNightMode() {
+        this.scene.background = new THREE.Color(0x000000);
+        this.light.setAmbientLightIntensity(0.1);
+        this.light.setHemisphericLightIntensity(0.2);
+        this.light.setHemisphericLightColors(0x000000, 0x080808);
     }
 
 }
