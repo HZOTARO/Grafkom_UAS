@@ -55,6 +55,20 @@ export class Light {
         this.scene.add(this.hemisphericLight);
     }
 
+    createPointLight(position, intensity, distance, decay) {
+        this.pointLight = new THREE.PointLight(0xffffff, intensity, distance, decay);
+        this.pointLight.position.set(position.x, position.y, position.z);
+        this.pointLight.castShadow = true;
+
+        // Shadow settings
+        this.pointLight.shadow.mapSize.width = 1024;
+        this.pointLight.shadow.mapSize.height = 1024;
+        this.pointLight.shadow.camera.near = 0.5;
+        this.pointLight.shadow.camera.far = 500;
+
+        this.scene.add(this.pointLight);
+    }
+
     setAmbientLightIntensity(intensity) {
         if (this.ambientLight) {
             this.ambientLight.intensity = intensity;
@@ -80,15 +94,27 @@ export class Light {
     }
 
     setHemisphericLightIntensity(intensity) {
-      if (this.hemisphericLight) {
-          this.hemisphericLight.intensity = intensity;
-      }
-  }
+        if (this.hemisphericLight) {
+            this.hemisphericLight.intensity = intensity;
+        }
+    }
 
-  setHemisphericLightColors(skyColor, groundColor) {
-      if (this.hemisphericLight) {
-          this.hemisphericLight.skyColor.set(skyColor);
-          this.hemisphericLight.groundColor.set(groundColor);
-      }
-  }
+    setHemisphericLightColors(skyColor, groundColor) {
+        if (this.hemisphericLight) {
+            this.hemisphericLight.skyColor.set(skyColor);
+            this.hemisphericLight.groundColor.set(groundColor);
+        }
+    }
+
+    setPointLightIntensity(intensity) {
+        if (this.pointLight) {
+            this.pointLight.intensity = intensity;
+        }
+    }
+
+    setPointLightPosition(position) {
+        if (this.pointLight) {
+            this.pointLight.position.set(position.x, position.y, position.z);
+        }
+    }
 }
