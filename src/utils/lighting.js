@@ -78,4 +78,17 @@ export class Light {
             this.spotLight.angle = angle;
         }
     }
+
+    setHemisphericLightIntensity(intensity) {
+      if (this.hemisphericLight) {
+          this.hemisphericLight.intensity = intensity;
+      }
+  }
+
+  setHemisphericLightColors(skyColor, groundColor) {
+      if (this.hemisphericLight) {
+          this.hemisphericLight.skyColor.set(skyColor);
+          this.hemisphericLight.groundColor.set(groundColor);
+      }
+  }
 }

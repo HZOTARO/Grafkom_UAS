@@ -98,7 +98,7 @@ export class Environment {
     }
 
     setupLighting() {
-        this.light = new Light(scene);
+        this.light = new Light(this.scene);
         this.light.createAmbientLight(0.8);
         this.light.createHemisphericLight(0x87CEEB, 0x444444, 0.6);
         // this.scene.add(this.light.ambientLight);
