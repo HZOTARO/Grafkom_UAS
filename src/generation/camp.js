@@ -4,7 +4,7 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
 
 export class Camp {
-    constructor(scene, scale, pos, physicsWorld) {
+    constructor(scene,  physicsWorld, scale = 20, pos  = {x: 0, y: 5.5, z: 0}) {
         this.scene = scene;
         this.scale = scale;
         this.pos = pos;
@@ -14,13 +14,13 @@ export class Camp {
 
     loadModel() {
         const mtlLoader = new MTLLoader();
-        mtlLoader.setPath('./models/Camp/');
+        mtlLoader.setPath('../../asset/model/Camp/');
         mtlLoader.load('materials.mtl', (materials) => {
             materials.preload();
 
             const objLoader = new OBJLoader();
             objLoader.setMaterials(materials);
-            objLoader.setPath('./models/Camp/');
+            objLoader.setPath('../../asset/model/Camp/');
             objLoader.load('model.obj', (object) => {
                 object.scale.set(this.scale, this.scale, this.scale);
                 object.position.set(this.pos.x, this.pos.y, this.pos.z);

@@ -7,6 +7,9 @@ import { scene } from './Scene.js';
 import { KeyDisplay } from '../utils/utils.js';
 import { Character } from '../generation/Character.js';
 import { Platform } from '../generation/Platform.js';
+import { Camp } from '../generation/camp.js';
+import { generateTrees } from '../generation/tree.js';
+import { Wall } from '../generation/Wall.js';
 
 export class Environment {
     constructor() {
@@ -34,29 +37,44 @@ export class Environment {
 
     runGeneration() {
         this.createGround();
-        // this.platform = new Platform(this.scene, physicsWorld);
         this.character = new Character(this.scene, this.camera, this.orbitControls, this.physicsWorld);
-        // Move the assignment of characterControls inside the callback of Character's constructor
-        // to ensure it's assigned only after initialization is complete.
         this.character.characterControlsPromise.then((controls) => {
             this.characterControls = controls;
             console.log('CharacterControls initialized', this.characterControls);
         }).catch((error) => {
             console.error('Failed to initialize character controls:', error);
         });
+        this.camp = new Camp(this.scene, this.physicsWorld);
+        this.platform = new Wall(this.scene, this.physicsWorld, { x: 5000, y: 3, z: 5000 }, { x: 0, y: -4.505, z: 0 });
+        this.wall1 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 1000 }, { x: 14, y: 5, z: -620 });
+        this.wall2 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 1000 }, { x: -70, y: 5, z: -620 });
+        this.wall3 = new Wall(this.scene, this.physicsWorld, { x:70, y:30, z:5}, {x:-100, y:5, z:-120});
+        this.wall4 = new Wall(this.scene, this.physicsWorld, { x:90, y:30, z:5}, {x:60, y:5, z:-120});
+        this.wall5 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 200 }, { x: -135, y: 5, z: -20 });
+        this.wall6 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 200 }, { x: 100, y: 5, z: -20 });
+        this.wall6 = new Wall(this.scene, this.physicsWorld, {x:250, y:30, z:5}, {x:-20, y:5, z:80});
 
+        // Harusnya 5000, tapi biar render e ga lama
+        generateTrees(this.scene, 2500, 1);
     }
 
     animate() {
         requestAnimationFrame(this.animate.bind(this));
         const delta = this.clock.getDelta();
 
-        console.log(this.characterControls);
+        this.keysPressed = {
+            Space: this.character.input.jump,
+            KeyW: this.character.input.forward,
+            KeyS: this.character.input.backward,
+            KeyA: this.character.input.left,
+            KeyD: this.character.input.right,
+        };
 
         if (this.physicsWorld) {
             this.physicsWorld.stepSimulation(delta, 10);
         }
 
+        console.log('is flying : ' + this.isFlying);
         if (this.isFlying) {
             this.handleFlyControls(delta);
         } else {
@@ -66,11 +84,10 @@ export class Environment {
             this.orbitControls.update();
         }
 
-        // this.character.update(delta);
+        this.character.update(delta);
 
         this.renderer.render(this.scene, this.camera);
     }
-    
 
     setupRenderer() {
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -92,6 +109,18 @@ export class Environment {
         this.orbitControls.update();
 
         this.flyControls = new PointerLockControls(this.camera, document.body);
+
+        document.addEventListener('click', () => {
+            this.flyControls.lock();
+        });
+
+        this.flyControls.addEventListener('lock', () => {
+            console.log('Pointer locked');
+        });
+
+        this.flyControls.addEventListener('unlock', () => {
+            console.log('Pointer unlocked');
+        });
     }
 
     setupLighting() {
@@ -163,13 +192,14 @@ export class Environment {
     initEventListeners() {
         document.addEventListener('keydown', (event) => {
             this.keyDisplayQueue.down(event.key);
+            console.log(`Key down: ${event.key} (code: ${event.code})`);
             if (event.shiftKey && this.characterControls) {
                 this.characterControls.switchRunToggle();
             } else {
-                this.keysPressed[event.key.toLowerCase()] = true;
-                if (event.key.toLowerCase() === 'f') {
+                this.keysPressed[event.code] = true;
+                if (event.code === 'KeyF') {
                     this.toggleMode('fly');
-                } else if (event.key.toLowerCase() === 'g') {
+                } else if (event.code === 'KeyG') {
                     this.toggleMode('walk');
                 }
             }
@@ -177,7 +207,8 @@ export class Environment {
 
         document.addEventListener('keyup', (event) => {
             this.keyDisplayQueue.up(event.key);
-            this.keysPressed[event.key.toLowerCase()] = false;
+            console.log(`Key up: ${event.key} (code: ${event.code})`);
+            this.keysPressed[event.code] = false;
         }, false);
     }
 
@@ -193,20 +224,18 @@ export class Environment {
         }
     }
 
-
-
     handleFlyControls(delta) {
-        const velocity = new THREE.Vector3();
-        if (this.keysPressed['w']) velocity.z -= 5000.0 * delta;
-        if (this.keysPressed['s']) velocity.z += 5000.0 * delta;
-        if (this.keysPressed['a']) velocity.x -= 5000.0 * delta;
-        if (this.keysPressed['d']) velocity.x += 5000.0 * delta;
-        if (this.keysPressed[' ']) velocity.y += 5000.0 * delta;
-        if (this.keysPressed['shift']) velocity.y -= 5000 * delta;
+        const fly = new THREE.Vector3();
+        console.log(this.keysPressed['KeyW']);
+        if (this.keysPressed['KeyW']) fly.z += 5000.0 * delta;
+        if (this.keysPressed['KeyS']) fly.z -= 5000.0 * delta;
+        if (this.keysPressed['KeyA']) fly.x += 5000.0 * delta;
+        if (this.keysPressed['KeyD']) fly.x -= 5000.0 * delta;
+        if (this.keysPressed['Space']) fly.y += 5000.0 * delta;
+        if (this.keysPressed['Shift']) fly.y -= 5000 * delta;
 
-        this.flyControls.getObject().translateX(velocity.x * delta);
-        this.flyControls.getObject().translateY(velocity.y * delta);
-        this.flyControls.getObject().translateZ(velocity.z * delta);
+        this.flyControls.getObject().translateX(fly.x * delta);
+        this.flyControls.getObject().translateY(fly.y * delta);
+        this.flyControls.getObject().translateZ(fly.z * delta);
     }
-
 }
