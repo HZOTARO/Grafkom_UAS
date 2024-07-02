@@ -5,11 +5,14 @@ import { physicsWorld, setupPhysicalWorld } from './Physics.js';
 import { camera } from './Camera.js';
 import { scene } from './Scene.js';
 import { KeyDisplay } from '../utils/utils.js';
-import { Character } from '../generation/Character.js';
+import { Character } from '../generation/character.js';
 import { Platform } from '../generation/Platform.js';
 import { Camp } from '../generation/camp.js';
 import { generateTrees } from '../generation/tree.js';
 import { Wall } from '../generation/Wall.js';
+import { Fence } from '../generation/Fence.js';
+import { Grass, generateGrass } from '../generation/Grass.js';
+import { Firefly, generateFireflyCluster } from '../generation/Firefly.js'; // Import Firefly
 
 export class Environment {
     constructor() {
@@ -19,6 +22,7 @@ export class Environment {
         this.isFlying = false;
         this.flyControls = null;
         this.clock = new THREE.Clock();
+        this.fireflyClusters = []; // Store fireflies
 
         this.scene = scene;
         this.camera = camera;
@@ -54,14 +58,44 @@ export class Environment {
         this.wall6 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 200 }, { x: 100, y: 5, z: -20 });
         this.wall6 = new Wall(this.scene, this.physicsWorld, {x:250, y:30, z:5}, {x:-20, y:5, z:80});
 
+
+        this.fence1 = new Fence(this.scene, {x:30, y:-3, z:-140}, 20, Math.PI/4);
+        this.fence2 = new Fence(this.scene, {x:80, y:-3, z:-130}, 20, Math.PI/2 + 0.05);
+        this.fence3 = new Fence(this.scene, {x:110, y:-3, z:-100}, 20, Math.PI/12);
+        this.fence4 = new Fence(this.scene, {x:110, y:-3, z:-40}, 20, Math.PI/12 -0.2);
+        this.fence5 = new Fence(this.scene, {x:110, y:-3, z:20}, 20, Math.PI/12 -0.5);
+        this.fence6 = new Fence(this.scene, {x:110, y:-3, z:80}, 20, Math.PI - 0.3);
+        this.fence7 = new Fence(this.scene, {x:50, y:-3, z:90}, 20, Math.PI/2 + 0.1);
+        this.fence8 = new Fence(this.scene, {x:-20, y:-3, z:90}, 20, Math.PI/2 - 0.05);
+        this.fence9 = new Fence(this.scene, {x:-80, y:-3, z:90}, 20, Math.PI/2 - 0.1);
+        this.fence10 = new Fence(this.scene, {x:-140, y:-3, z:80}, 20, Math.PI/4);
+        this.fence10 = new Fence(this.scene, {x:-140, y:-3, z:30}, 20, -Math.PI/12);
+        this.fence10 = new Fence(this.scene, {x:-140, y:-3, z:-40}, 20, Math.PI/24);
+        this.fence11 = new Fence(this.scene, {x:-140, y:-3, z:-100}, 20, -Math.PI/24);
+        this.fence12 = new Fence(this.scene, {x:-100, y:-3, z:-140}, 20, -Math.PI/4);
+
         // Harusnya 5000, tapi biar render e ga lama
-        generateTrees(this.scene, 2500, 1);
+        // generateTrees(this.scene, 2500, 1);
+        this.grass = new Grass(this.scene, {x:50, y:-3, z:90}, 30, 0);
+        generateGrass(this.scene, 400, 30);
+
+        // Create multiple firefly clusters at random positions
+        for (let i = 0; i < 5; i++) {
+            const clusterPosition = new THREE.Vector3(
+                Math.random() * 300 - 100,   // Random x position within a range
+                Math.random() * 10,     // Random y position within a range
+                Math.random() * 300 - 100    // Random z position within a range
+            );
+            const fireflyCluster = generateFireflyCluster(this.scene, 10, 0xffff00, clusterPosition);
+            this.fireflyClusters.push(fireflyCluster);
+        }
+        
     }
 
     animate() {
         requestAnimationFrame(this.animate.bind(this));
         const delta = this.clock.getDelta();
-
+    
         this.keysPressed = {
             Space: this.character.input.jump,
             KeyW: this.character.input.forward,
@@ -69,11 +103,11 @@ export class Environment {
             KeyA: this.character.input.left,
             KeyD: this.character.input.right,
         };
-
+    
         if (this.physicsWorld) {
             this.physicsWorld.stepSimulation(delta, 10);
         }
-
+    
         console.log('is flying : ' + this.isFlying);
         if (this.isFlying) {
             this.handleFlyControls(delta);
@@ -83,11 +117,21 @@ export class Environment {
             }
             this.orbitControls.update();
         }
-
+    
         this.character.update(delta);
-
+    
+        // Update all fireflies
+        if (this.fireflyClusters) {
+            this.fireflyClusters.forEach(cluster => {
+                cluster.forEach(firefly => {
+                    firefly.update();
+                });
+            });
+        }
+    
         this.renderer.render(this.scene, this.camera);
     }
+    
 
     setupRenderer() {
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
