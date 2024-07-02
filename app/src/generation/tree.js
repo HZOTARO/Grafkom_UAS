@@ -27,15 +27,38 @@ export class Tree {
     }
 }
 
+
+
 export function generateTrees(scene, gridSize, scale) {
     const trees = [];
     const spacing = 150; // Jarak antar pohon
     const exclusionRadius = 100; // Radius untuk menghindari generate pohon di sekitar (0,0)
+    const centralMargin = 140; // Margin untuk menghindari garis tengah
+    const randomShift = 50; // Pergeseran acak untuk variasi
+
+    const randomRange = (min, max) => THREE.MathUtils.randFloat(min, max);
 
     for (let x = -gridSize / 2; x <= gridSize / 2; x += spacing) {
-        for (let z = -gridSize / 2; z <= gridSize / 2; z += spacing) { 
-            if (Math.sqrt(x * x + z * z) > exclusionRadius) {
-                const position = new THREE.Vector3(x, -2, z);
+        for (let z = -gridSize / 2; z <= gridSize / 2; z += spacing) {
+            // Menghasilkan posisi acak dalam jangkauan grid dengan variasi
+            let randomX = randomRange(x - spacing / 2 + randomShift, x + spacing / 2 - randomShift);
+            let randomZ = randomRange(z - spacing / 2 + randomShift, z + spacing / 2 - randomShift);
+
+            // Mengecek jarak dari pusat (0,0) untuk menghindari radius pengecualian dan garis tengah
+            const distanceFromCenter = Math.sqrt(randomX * randomX + randomZ * randomZ);
+
+            // Memastikan tidak ada garis lurus di satu sumbu
+            if (Math.abs(randomX) < centralMargin) {
+                randomX = randomX < 0 ? randomX - centralMargin : randomX + centralMargin;
+            }
+            if (Math.abs(randomZ) < centralMargin) {
+                randomZ = randomZ < 0 ? randomZ - centralMargin : randomZ + centralMargin;
+            }
+
+            if ((distanceFromCenter > exclusionRadius) &&
+                (Math.abs(randomX) > centralMargin) &&
+                (Math.abs(randomZ) > centralMargin)) {
+                const position = new THREE.Vector3(randomX, -2, randomZ);
                 const tree = new Tree(scene, scale, position);
                 trees.push(tree);
             }
@@ -44,3 +67,5 @@ export function generateTrees(scene, gridSize, scale) {
 
     return trees;
 }
+
+

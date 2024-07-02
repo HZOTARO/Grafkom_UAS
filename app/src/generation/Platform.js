@@ -25,11 +25,11 @@ export class Platform {
             opacity: 0.5,
             shininess: 100,
         });
-        this.glassMesh = new THREE.Mesh(glassGeometry, glassMaterial);
-        this.glassMesh.position.set(0, 2, 0);
-        this.glassMesh.castShadow = true;
-        this.glassMesh.receiveShadow = true;
-        scene.add(this.glassMesh);
+        // this.glassMesh = new THREE.Mesh(glassGeometry, glassMaterial);
+        // this.glassMesh.position.set(0, 2, 0);
+        // this.glassMesh.castShadow = true;
+        // this.glassMesh.receiveShadow = true;
+        // scene.add(this.glassMesh);
 
         // Ammo.js Physics
         const transform = new Ammo.btTransform();
