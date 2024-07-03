@@ -117,7 +117,6 @@ export class Character {
     }
 
     onKeyPressed(e){
-        console.log(e)
         switch (e.key.toUpperCase()) {
             case 'T':
                 this.cameraControl = new ThirdPersonCamera( this.camera, this.position );
@@ -187,10 +186,17 @@ export class Character {
         });
     }
 
+    addSpotLight() {
+        this.light = new Light(this.scene);
+        this.light.createSpotLight({ x: 0, y: 10, z: 0 }, this.model.position, 1000, 100, Math.PI / 8, 0.1, 2);
+        
+        this.light.spotLight.target = this.model;
+        this.scene.add(this.light.spotLight.target);
+        this.light.spotLight.position.set(0, 10, 0);
+    }
+    
     update(dt) {
-        // this.characterControlsPromise.then(() => {
-            this.cameraControl.update(dt);
-
+        this.cameraControl.update(dt);
             if(this.model!=null){
                 if(this.thirdPerson){
                     if(!this.init_idle) this.animations.get('Poses').play();
@@ -255,5 +261,6 @@ export class Character {
         // }).catch((error) => {
         //     console.error('Error updating character controls:', error);
         // });
+            // this.light.spotLight.position.set(this.model.position.x, this.model.position.y + 20, this.model.position.z);
+        }
     }
-}

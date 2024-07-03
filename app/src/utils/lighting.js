@@ -28,37 +28,14 @@ export class Light {
         this.scene.add(this.directionalLight);
     }
 
-    createSpotLight(position, intensity, angle) {
-        this.spotLight = new THREE.SpotLight(0xFF1111, intensity);
-        this.spotLight.position.set(position.x, position.y, position.z);
-        this.spotLight.angle = angle;
-        this.spotLight.distance = 1000;
-        this.spotLight.penumbra = 0.1;
-        this.spotLight.decay = 2;
-        this.spotLight.castShadow = true;
-
-        // Shadow settings
-        const d = 20;
-        this.spotLight.shadow.camera.top = d;
-        this.spotLight.shadow.camera.bottom = -d;
-        this.spotLight.shadow.camera.left = -d;
-        this.spotLight.shadow.camera.right = d;
-        this.spotLight.shadow.mapSize.width = 2048;
-        this.spotLight.shadow.mapSize.height = 2048;
-        this.spotLight.shadow.camera.near = 0.5;
-        this.spotLight.shadow.camera.far = 500;
-
-        this.scene.add(this.spotLight);
-    }
-
     createHemisphericLight(skyColor, groundColor, intensity) {
         this.hemisphericLight = new THREE.HemisphereLight(skyColor, groundColor, intensity);
         this.scene.add(this.hemisphericLight);
     }
 
-    createPointLight(position, intensity, distance, decay) {
-        this.pointLight = new THREE.PointLight(0xffffff, intensity, distance, decay);
-        this.pointLight.position.set(position.x, position.y, position.z);
+    createPointLight(intensity, distance, decay) {
+        this.pointLight = new THREE.PointLight(0xFFFF11, intensity, distance, decay);
+        // this.pointLight.position.set(position.x, position.y, position.z);
         this.pointLight.castShadow = true;
 
         // Shadow settings
@@ -68,6 +45,23 @@ export class Light {
         this.pointLight.shadow.camera.far = 500;
 
         this.scene.add(this.pointLight);
+    }
+
+    createSpotLight(position, target, intensity, distance, angle, penumbra, decay) {
+        this.spotLight = new THREE.SpotLight(0xffffff, intensity, distance, angle, penumbra, decay);
+        this.spotLight.position.set(position.x, position.y, position.z);
+        this.spotLight.target.position.set(target.x, target.y, target.z);
+        this.spotLight.castShadow = true;
+
+        // Shadow settings
+        this.spotLight.shadow.mapSize.width = 1024;
+        this.spotLight.shadow.mapSize.height = 1024;
+        this.spotLight.shadow.camera.near = 0.5;
+        this.spotLight.shadow.camera.far = 500;
+
+        this.scene.add(this.spotLight);
+        this.scene.add(this.spotLight.target);
+        return this.spotLight;
     }
 
     setAmbientLightIntensity(intensity) {
@@ -85,18 +79,6 @@ export class Light {
     setDirectionalLightIntensity(intensity) {
         if (this.directionalLight) {
             this.directionalLight.intensity = intensity;
-        }
-    }
-
-    setSpotLightPosition(position) {
-        if (this.spotLight) {
-            this.spotLight.position.set(position.x, position.y, position.z);
-        }
-    }
-
-    setSpotLightAngle(angle) {
-        if (this.spotLight) {
-            this.spotLight.angle = angle;
         }
     }
 

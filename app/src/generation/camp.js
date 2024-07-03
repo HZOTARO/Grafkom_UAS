@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import {GLTFLoader} from "three/addons";
+import { Light } from '../utils/lighting.js';
 
 
 export class Camp {
@@ -20,6 +21,8 @@ export class Camp {
             this.model.position.set(this.position.x, this.position.y, this.position.z);
 
             this.scene.add(this.model);
+
+            this.campFireLight();
 
             // const gltfAnimations = gltf.animations;
             // const mixer = new THREE.AnimationMixer(this.model);
@@ -40,6 +43,21 @@ export class Camp {
             reject(error);
         });
     }
+
+    campFireLight() {
+        const geometry = new THREE.SphereGeometry(0.1, 1, 1);
+        const material = new THREE.MeshPhongMaterial({ color: 0xffff33 });
+        const mesh = new THREE.Mesh(geometry, material);
+        this.scene.add(mesh);
+        mesh.visible = true;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+    
+        this.light = new Light(this.scene);
+        this.light.createPointLight(1, 0, 0.2); // (intensity, decay, distance)
+        mesh.add(this.light.pointLight);
+        mesh.position.set(this.position.x-23, this.position.y-5, this.position.z+18);
+    }    
 
     // loadModel() {
     //     const mtlLoader = new MTLLoader();

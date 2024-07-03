@@ -228,6 +228,9 @@ export class Environment {
             this.fireflyClusters.push(fireflyCluster);
         }
         this.light.setDirectionalLightIntensity(0.01);
+        this.light.setHemisphericLightIntensity(0.2);
+        // this.light.setHemisphericLightColors(0x000000, 0x080808); //not working idk why
+        this.light.setDirectionalLightIntensity(0.5);
     }
 
 }
