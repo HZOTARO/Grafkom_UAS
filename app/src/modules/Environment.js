@@ -5,11 +5,15 @@ import { physicsWorld, setupPhysicalWorld } from './Physics.js';
 import { camera } from './Camera.js';
 import { scene } from './Scene.js';
 import { KeyDisplay } from '../utils/utils.js';
-import { Character } from '../generation/Character.js';
+import { Character } from '../generation/character.js';
 import { Platform } from '../generation/Platform.js';
 import { Camp } from '../generation/camp.js';
 import { generateTrees } from '../generation/tree.js';
 import { Wall } from '../generation/Wall.js';
+import { Fence } from '../generation/Fence.js';
+import { Grass, generateGrass } from '../generation/Grass.js';
+import { Firefly, generateFireflyCluster } from '../generation/Firefly.js'; // Import Firefly
+import { Light } from '../utils/lighting.js';
 
 export class Environment {
     constructor() {
@@ -19,6 +23,7 @@ export class Environment {
         this.isFlying = false;
         this.flyControls = null;
         this.clock = new THREE.Clock();
+        this.fireflyClusters = []; // Store fireflies
 
         this.scene = scene;
         this.camera = camera;
@@ -37,6 +42,7 @@ export class Environment {
 
     runGeneration() {
         this.createGround();
+        // this.platform = new Platform(this.scene, physicsWorld);
         this.character = new Character(this.scene, this.camera, this.orbitControls, this.physicsWorld);
         this.character.characterControlsPromise.then((controls) => {
             this.characterControls = controls;
@@ -54,8 +60,38 @@ export class Environment {
         this.wall6 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 200 }, { x: 100, y: 5, z: -20 });
         this.wall6 = new Wall(this.scene, this.physicsWorld, {x:250, y:30, z:5}, {x:-20, y:5, z:80});
 
+
+        this.fence1 = new Fence(this.scene, {x:30, y:-3, z:-140}, 20, Math.PI/4);
+        this.fence2 = new Fence(this.scene, {x:80, y:-3, z:-130}, 20, Math.PI/2 + 0.05);
+        this.fence3 = new Fence(this.scene, {x:110, y:-3, z:-100}, 20, Math.PI/12);
+        this.fence4 = new Fence(this.scene, {x:110, y:-3, z:-40}, 20, Math.PI/12 -0.2);
+        this.fence5 = new Fence(this.scene, {x:110, y:-3, z:20}, 20, Math.PI/12 -0.5);
+        this.fence6 = new Fence(this.scene, {x:110, y:-3, z:80}, 20, Math.PI - 0.3);
+        this.fence7 = new Fence(this.scene, {x:50, y:-3, z:90}, 20, Math.PI/2 + 0.1);
+        this.fence8 = new Fence(this.scene, {x:-20, y:-3, z:90}, 20, Math.PI/2 - 0.05);
+        this.fence9 = new Fence(this.scene, {x:-80, y:-3, z:90}, 20, Math.PI/2 - 0.1);
+        this.fence10 = new Fence(this.scene, {x:-140, y:-3, z:80}, 20, Math.PI/4);
+        this.fence10 = new Fence(this.scene, {x:-140, y:-3, z:30}, 20, -Math.PI/12);
+        this.fence10 = new Fence(this.scene, {x:-140, y:-3, z:-40}, 20, Math.PI/24);
+        this.fence11 = new Fence(this.scene, {x:-140, y:-3, z:-100}, 20, -Math.PI/24);
+        this.fence12 = new Fence(this.scene, {x:-100, y:-3, z:-140}, 20, -Math.PI/4);
+
         // Harusnya 5000, tapi biar render e ga lama
-        generateTrees(this.scene, 2500, 1);
+        // generateTrees(this.scene, 2500, 1);
+        this.grass = new Grass(this.scene, {x:50, y:-3, z:90}, 30, 0);
+        generateGrass(this.scene, 400, 30);
+
+        // Create multiple firefly clusters at random positions
+        for (let i = 0; i < 5; i++) {
+            const clusterPosition = new THREE.Vector3(
+                Math.random() * 300 - 100,   // Random x position within a range
+                Math.random() * 10,     // Random y position within a range
+                Math.random() * 300 - 100    // Random z position within a range
+            );
+            const fireflyCluster = generateFireflyCluster(this.scene, 10, 0xffff00, clusterPosition);
+            this.fireflyClusters.push(fireflyCluster);
+        }
+
     }
 
     animate() {
@@ -74,7 +110,6 @@ export class Environment {
             this.physicsWorld.stepSimulation(delta, 10);
         }
 
-        console.log('is flying : ' + this.isFlying);
         if (this.isFlying) {
             this.handleFlyControls(delta);
         } else {
@@ -86,8 +121,18 @@ export class Environment {
 
         this.character.update(delta);
 
+        // Update all fireflies
+        if (this.fireflyClusters) {
+            this.fireflyClusters.forEach(cluster => {
+                cluster.forEach(firefly => {
+                    firefly.update();
+                });
+            });
+        }
+
         this.renderer.render(this.scene, this.camera);
     }
+    
 
     setupRenderer() {
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -124,24 +169,33 @@ export class Environment {
     }
 
     setupLighting() {
-        const ambientLight = new THREE.AmbientLight(0x404040);
-        this.scene.add(ambientLight);
+        this.light = new Light(this.scene);
+        this.light.createAmbientLight(0.8);
+        this.light.createHemisphericLight(0x87CEEB, 0x444444, 0.6);
+        // this.scene.add(this.light.ambientLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(1, 1, 1).normalize();
-        directionalLight.castShadow = true;
-        directionalLight.shadow.mapSize.width = 2048;
-        directionalLight.shadow.mapSize.height = 2048;
-        directionalLight.shadow.camera.near = 0.5;
-        directionalLight.shadow.camera.far = 500;
-        this.scene.add(directionalLight);
+        // const ambientLight = new THREE.AmbientLight(0x404040);
+        // this.scene.add(ambientLight);
+
+        // const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        // directionalLight.position.set(1, 1, 1).normalize();
+        // directionalLight.castShadow = true;
+        // directionalLight.shadow.mapSize.width = 2048;
+        // directionalLight.shadow.mapSize.height = 2048;
+        // directionalLight.shadow.camera.near = 0.5;
+        // directionalLight.shadow.camera.far = 500;
+        // this.scene.add(directionalLight);
     }
 
     createButtons() {
         const flyBtn = this.createButton('Fly Mode (F)', '10px', '10px', () => this.toggleMode('fly'));
         const walkBtn = this.createButton('Walk Mode (G)', '10px', '120px', () => this.toggleMode('walk'));
+        const dayBtn = this.createButton('Day Mode', '10px', '250px', () => this.setDayMode());
+        const nightBtn = this.createButton('Night Mode', '10px', '350px', () => this.setNightMode());
         document.body.appendChild(flyBtn);
         document.body.appendChild(walkBtn);
+        document.body.appendChild(dayBtn);
+        document.body.appendChild(nightBtn);
     }
 
     createButton(innerText, top, left, onClick) {
@@ -192,7 +246,6 @@ export class Environment {
     initEventListeners() {
         document.addEventListener('keydown', (event) => {
             this.keyDisplayQueue.down(event.key);
-            console.log(`Key down: ${event.key} (code: ${event.code})`);
             if (event.shiftKey && this.characterControls) {
                 this.characterControls.switchRunToggle();
             } else {
@@ -238,4 +291,19 @@ export class Environment {
         this.flyControls.getObject().translateY(fly.y * delta);
         this.flyControls.getObject().translateZ(fly.z * delta);
     }
+
+    setDayMode() {
+        this.scene.background = new THREE.Color(0x87CEEB);
+        this.light.setAmbientLightIntensity(0.8);
+        this.light.setHemisphericLightIntensity(0.6);
+        this.light.setHemisphericLightColors(0x87CEEB, 0x444444);
+    }
+
+    setNightMode() {
+        this.scene.background = new THREE.Color(0x000000);
+        this.light.setAmbientLightIntensity(0.1);
+        this.light.setHemisphericLightIntensity(0.2);
+        this.light.setHemisphericLightColors(0x000000, 0x080808);
+    }
+
 }

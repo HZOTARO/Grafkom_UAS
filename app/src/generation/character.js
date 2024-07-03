@@ -2,12 +2,15 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { CharacterControls } from '../controls/characterControls.js'; // Sesuaikan path sesuai struktur proyek
 import Ammo from 'ammo.js';
+import { Light } from '../utils/lighting.js';
 
 export class Character {
     constructor(scene, camera, orbitControls, physicsWorld, scale = 5, position = { x: 0, y: -2.5, z: -70 }, rotationY = Math.PI) {
         this.scene = scene;
         this.camera = camera;
         this.orbitControls = orbitControls;
+        this.light = new Light(scene);
+        this.light.createDirectionalLight({ x: 0, y: 10, z: 10 }, 0.5);
 
         this.characterControlsPromise = new Promise((resolve, reject) => {
             const loader = new GLTFLoader();
@@ -19,6 +22,9 @@ export class Character {
                 this.model.scale.set(scale, scale, scale);
                 this.model.position.set(position.x, position.y, position.z);
                 this.model.rotation.y = rotationY;
+
+                this.model.add(this.light.directionalLight);
+                this.model.add(this.light.directionalLight.target);
             
                 this.scene.add(this.model);
             
