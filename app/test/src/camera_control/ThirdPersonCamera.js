@@ -1,8 +1,9 @@
 import { Euler, Vector3 } from "three";
 
-export class FirstPersonCamera{
+export class ThirdPersonCamera{
     constructor(camera, pos){
         this.camera = camera;
+        this.distance = 10;
         
         this.position = pos;
         this.camera.position.set(...this.position);
@@ -21,7 +22,7 @@ export class FirstPersonCamera{
         this.mouseDown = false;
         this.deltaRotate = new Euler(0,0,0);
         this.THETA = 0;
-        this.ALPHA = -Math.PI/2;
+        this.ALPHA = -Math.PI * 0.75;
         this.rotationSpeed = 1;
         
         this.bindControl();
@@ -96,7 +97,7 @@ export class FirstPersonCamera{
             this.THETA -= deltaX;
             this.ALPHA -= deltaY;
 
-            this.ALPHA = Math.max(Math.min(-Math.PI * 0.25, this.ALPHA), -Math.PI * 0.75)
+            this.ALPHA = Math.max(Math.min(-Math.PI * 0.5, this.ALPHA), -Math.PI * 1)
         }
     }
     
@@ -116,10 +117,10 @@ export class FirstPersonCamera{
     }
 
     updateRotate(dt){
-        const targetPosition = new Vector3();
+        const targetPosition = this.position;
         const position = this.camera.position;
 
-        targetPosition.setFromSphericalCoords( 1, this.ALPHA, this.THETA ).add( position );
+        position.setFromSphericalCoords( -this.distance, this.ALPHA, this.THETA ).add( targetPosition );
         
         this.camera.lookAt( targetPosition );
         

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { FirstPersonCamera } from './camera_control/FirstPersonCamera';
+import { ThirdPersonCamera } from './camera_control/ThirdPersonCamera';
 
 var scene, camera, renderer, firstPerson_control;
 var cube, plane;
@@ -14,32 +15,36 @@ function init(){
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.setAnimationLoop( animate );
     document.body.appendChild( renderer.domElement );
-
-    firstPerson_control = new FirstPersonCamera( camera, new THREE.Vector3(0,0,5) );
-    firstPerson_control.movementSpeed = 10;
-    firstPerson_control.rotationSpeed = 1;
     
     const geometry = new THREE.BoxGeometry( 1, 1, 1 );
     const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
     cube = new THREE.Mesh( geometry, material );
     scene.add( cube );
-
+    
     plane = new THREE.Mesh( 
         new THREE.PlaneGeometry( 10, 10 ), 
         new THREE.MeshBasicMaterial( { color: 0x00ffff } ) );
-    plane.position.y = -2;
+    plane.position.y = -0.5;
     plane.rotateX(-Math.PI/2);
     scene.add( plane );
+    
+    // firstPerson_control = new FirstPersonCamera( camera, new THREE.Vector3(0,0,5) );
+    // firstPerson_control.movementSpeed = 10;
+    // firstPerson_control.rotationSpeed = 1;
 
+    firstPerson_control = new ThirdPersonCamera( camera, cube.position );
+    firstPerson_control.movementSpeed = 10;
+    firstPerson_control.rotationSpeed = 1;
+    
     window.addEventListener( 'resize', onWindowResize );
-}
-
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-
-    renderer.setSize( window.innerWidth, window.innerHeight );
-
+    }
+    
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        
     // firstPerson_control.handleResize();
 }
 
