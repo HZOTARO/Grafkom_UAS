@@ -9,8 +9,8 @@ export class Character {
         this.scene = scene;
         this.camera = camera;
         this.orbitControls = orbitControls;
-        this.light = new Light(scene);
-        this.light.createDirectionalLight({ x: 0, y: 10, z: 10 }, 0.5);
+        // this.light = new Light(scene);
+        // this.light.createDirectionalLight({ x: 0, y: 10, z: 10 }, 0.5);
 
         this.characterControlsPromise = new Promise((resolve, reject) => {
             const loader = new GLTFLoader();
@@ -23,24 +23,24 @@ export class Character {
                 this.model.position.set(position.x, position.y, position.z);
                 this.model.rotation.y = rotationY;
 
-                this.model.add(this.light.directionalLight);
-                this.model.add(this.light.directionalLight.target);
-            
+                // this.model.add(this.light.directionalLight);
+                // this.model.add(this.light.directionalLight.target);
+
                 this.scene.add(this.model);
-            
+
                 const gltfAnimations = gltf.animations;
                 const mixer = new THREE.AnimationMixer(this.model);
                 const animationsMap = new Map();
                 gltfAnimations.filter(a => a.name !== 'A-Pose').forEach((a) => {
                     animationsMap.set(a.name, mixer.clipAction(a));
                 });
-            
+
                 if (!this.orbitControls) {
                     console.error('OrbitControls is undefined');
                     reject('OrbitControls is undefined');
                     return;
                 }
-            
+
                 this.characterControls = new CharacterControls(this.model, mixer, animationsMap, this.orbitControls, this.camera, 'Poses');
                 resolve(this.characterControls);
             }, undefined, (error) => {
@@ -55,13 +55,13 @@ export class Character {
         const motionState = new Ammo.btDefaultMotionState(transform);
 
         const colShape = new Ammo.btBoxShape(new Ammo.btVector3(0.5, 0.5, 0.5));
-        colShape.setMargin(0.1);
+        colShape.setMargin(100);
         const localInertia = new Ammo.btVector3(0, 0, 0);
         colShape.calculateLocalInertia(1, localInertia);
 
         const rbInfo = new Ammo.btRigidBodyConstructionInfo(1, motionState, colShape, localInertia);
         this.body = new Ammo.btRigidBody(rbInfo);
-        
+
         // Set the character as a kinematic object to prevent falling
         this.body.setCollisionFlags(this.body.getCollisionFlags() | Ammo.btCollisionObject.CF_KINEMATIC_OBJECT);
 
@@ -135,7 +135,7 @@ export class Character {
 
             if (this.input.forward) {
                 this.direction.z -= force;
-            } 
+            }
             if (this.input.backward) {
                 this.direction.z += force;
             }

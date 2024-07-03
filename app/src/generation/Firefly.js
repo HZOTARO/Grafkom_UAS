@@ -49,7 +49,6 @@ export class Firefly {
     }
 }
 
-// Helper function to generate a cluster of fireflies
 export function generateFireflyCluster(scene, count, color = 0xffffff, clusterPosition = new THREE.Vector3()) {
     const fireflies = [];
 
@@ -67,3 +66,5 @@ export function generateFireflyCluster(scene, count, color = 0xffffff, clusterPo
 
     return fireflies;
 }
+
+
