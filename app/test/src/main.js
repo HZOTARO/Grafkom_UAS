@@ -1,9 +1,8 @@
 import * as THREE from 'three';
-import { FirstPersonCamera } from './camera_control/FirstPersonCamera';
-import { ThirdPersonCamera } from './camera_control/ThirdPersonCamera';
 import { Environment } from './scene/environtment';
+import { Player } from './player/Player';
 
-var scene, camera, renderer, cameraControl;
+var scene, camera, renderer, player, cameraControl;
 var environment;
 
 const clock = new THREE.Clock();
@@ -17,38 +16,33 @@ function init(){
     renderer.setAnimationLoop( animate );
     document.body.appendChild( renderer.domElement );
 
-    environment = new Environment(scene);
-    
-    // firstPerson_control = new FirstPersonCamera( camera, new THREE.Vector3(0,0,5) );
-    // firstPerson_control.movementSpeed = 10;
-    // firstPerson_control.rotationSpeed = 1;
+        //Ambient Light
+        var ambientLight = new THREE.AmbientLight(0x8888FF,100);
+        scene.add(ambientLight);
 
-    cameraControl = new ThirdPersonCamera( camera, environment.cube.position );
-    cameraControl.movementSpeed = 10;
-    cameraControl.rotationSpeed = 1;
+        //Directional Light
+        var directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
+        directionalLight.position.set( 3, 10, 10 );
+        directionalLight.castShadow = true;
+        directionalLight.shadow.camera.top = 20;
+        directionalLight.shadow.camera.bottom = -20;
+        directionalLight.shadow.camera.left = - 20;
+        directionalLight.shadow.camera.right = 20;
+        directionalLight.shadow.camera.near = 0.1;
+        directionalLight.shadow.camera.far = 40;
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
     
-    document.addEventListener("keypress", (e) => onKeyPressed(e), false);
+        // scene.add(new THREE.CameraHelper(directionalLight.shadow.camera));
+    
+        scene.add(directionalLight.target);
+
+    environment = new Environment(scene);
+    player = new Player(scene, camera);
+
     window.addEventListener( 'resize', onWindowResize );
     }
     
-function onKeyPressed(e){
-    switch (e.key.toUpperCase()) {
-        case 'T':
-            cameraControl = new ThirdPersonCamera( camera, environment.cube.position );
-            cameraControl.movementSpeed = 10;
-            cameraControl.rotationSpeed = 1;
-            break;
-        
-        case 'F':
-            cameraControl = new FirstPersonCamera( camera, new THREE.Vector3(0,0,5) );
-            cameraControl.movementSpeed = 10;
-            cameraControl.rotationSpeed = 1;
-            break;
-    
-        default:
-            break;
-    }
-}
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
@@ -59,7 +53,7 @@ function onWindowResize() {
 }
 
 function animate() {
-    cameraControl.update( clock.getDelta() );
+    player.update( clock.getDelta() );
 
     environment.update();
 
