@@ -15,7 +15,10 @@ export class Tree {
         loader.load("Resource_PineTree_Group.fbx", (fbx) => {
             fbx.scale.setScalar(0.01);
             fbx.traverse(c=> {
-                c.castShadow = true;
+                if(c.isMesh) {
+                    c.castShadow = true;
+                    c.receiveShadow = true;
+                }
             });
             this.mesh = fbx;
             this.mesh.scale.set(this.scale, this.scale, this.scale);
