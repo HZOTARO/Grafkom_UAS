@@ -61,9 +61,13 @@ export class Character {
         colShape.calculateLocalInertia(1, localInertia);
 
         const rbInfo = new Ammo.btRigidBodyConstructionInfo(1, motionState, colShape, localInertia);
+        rbInfo.set_m_linearSleepingThreshold(0); // Atur sleep threshold ke nilai yang sesuai
+        rbInfo.set_m_angularSleepingThreshold(0); // Atur sleep threshold angular ke nilai yang sesuai
         this.body = new Ammo.btRigidBody(rbInfo);
 
+
         // Set the character as a kinematic object to prevent falling
+        this.body.setActivationState(Ammo.btCollisionObject.DISABLE_DEACTIVATION);
         this.body.setCollisionFlags(this.body.getCollisionFlags() | Ammo.btCollisionObject.CF_KINEMATIC_OBJECT);
 
         physicsWorld.addRigidBody(this.body);
@@ -150,6 +154,7 @@ export class Character {
             this.direction.normalize().multiplyScalar(force);
             this.velocity.setValue(this.direction.x, this.velocity.y(), this.direction.z);
 
+            this.body.activate(); // Aktifkan karakter agar tidak tidur
             this.body.setLinearVelocity(this.velocity);
 
             const ms = this.body.getMotionState();
@@ -168,4 +173,5 @@ export class Character {
             }
         }
     }
+
 }
