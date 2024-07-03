@@ -26,6 +26,7 @@ export class Character {
                 // this.model.add(this.light.directionalLight);
                 // this.model.add(this.light.directionalLight.target);
 
+            
                 this.scene.add(this.model);
 
                 const gltfAnimations = gltf.animations;

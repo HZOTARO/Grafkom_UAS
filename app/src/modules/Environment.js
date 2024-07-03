@@ -165,6 +165,95 @@ export class Environment {
     setupLighting() {
         this.light = new Light(this.scene);
         this.light.createAmbientLight(0.8);
+        this.light.createHemisphericLight(0x87CEEB, 0x444444, 0.6);
+        this.light.createDirectionalLight({ x: 100, y: 200, z: 100 }, 1);
+        this.scene.add(this.light.ambientLight);
+        this.scene.add(this.light.hemisphericLight);
+        this.scene.add(this.light.directionalLight);
+
+        const helper = new THREE.DirectionalLightHelper(this.light.directionalLight, 10);
+        this.scene.add(helper);
+
+        const shadowCameraHelper = new THREE.CameraHelper(this.light.directionalLight.shadow.camera);
+        this.scene.add(shadowCameraHelper);
+    }
+
+    createButtons() {
+        const flyBtn = this.createButton('Fly Mode (F)', '10px', '10px', () => this.toggleMode('fly'));
+        const walkBtn = this.createButton('Walk Mode (G)', '10px', '120px', () => this.toggleMode('walk'));
+        const dayBtn = this.createButton('Day Mode', '10px', '250px', () => this.setDayMode());
+        const nightBtn = this.createButton('Night Mode', '10px', '350px', () => this.setNightMode());
+        document.body.appendChild(flyBtn);
+        document.body.appendChild(walkBtn);
+        document.body.appendChild(dayBtn);
+        document.body.appendChild(nightBtn);
+    }
+
+    createButton(innerText, top, left, onClick) {
+        const button = document.createElement('button');
+        button.innerText = innerText;
+        button.style.position = 'absolute';
+        button.style.top = top;
+        button.style.left = left;
+        button.addEventListener('click', onClick);
+        return button;
+    }
+
+    createGround() {
+        const groundGeo = new THREE.PlaneGeometry(5000, 5000, 1000, 1000);
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.setPath("../../asset/terrain/");
+
+        textureLoader.load("grass_texture.png", texture => {
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(50, 50);
+
+            textureLoader.load("terrain_texture.png", dispTexture => {
+                dispTexture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                dispTexture.repeat.set(1, 1);
+
+                const groundMat = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    map: texture,
+                    displacementMap: dispTexture,
+                    displacementScale: 200,
+                });
+
+                const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+                groundMesh.rotation.x = -Math.PI / 2;
+                groundMesh.position.y = -3;
+                groundMesh.receiveShadow = true;
+                this.scene.add(groundMesh);
+
+            }, undefined, err => {
+                console.error('An error occurred loading the displacement texture:', err);
+            });
+
+        }, undefined, err => {
+            console.error('An error occurred loading the diffuse texture:', err);
+        });
+    }
+
+    initEventListeners() {
+        document.addEventListener('keydown', (event) => {
+            this.keyDisplayQueue.down(event.key);
+            if (event.shiftKey && this.characterControls) {
+                this.characterControls.switchRunToggle();
+            } else {
+                this.keysPressed[event.code] = true;
+                if (event.code === 'KeyF') {
+                    this.toggleMode('fly');
+                } else if (event.code === 'KeyG') {
+                    this.toggleMode('walk');
+                }
+            }
+        }, false);
+
+        document.addEventListener('keyup', (event) => {
+            this.keyDisplayQueue.up(event.key);
+            console.log(`Key up: ${event.key} (code: ${event.code})`);
+            this.keysPressed[event.code] = false;
+        }, false);
     }
 
     toggleMode(mode) {
@@ -177,6 +266,7 @@ export class Environment {
 
     setDayMode() {
         this.scene.background = new THREE.Color(0x87CEEB);
+        this.scene.fog = new THREE.Fog(0x87ceeb, 100, 1000);
         this.light.setAmbientLightIntensity(0.8);
         this.light.setHemisphericLightIntensity(0.6);
         this.light.setHemisphericLightColors(0x87CEEB, 0x444444);
@@ -193,11 +283,13 @@ export class Environment {
             });
             this.fireflyClusters = []; // Clear the array
         }
+        this.light.setDirectionalLightIntensity(1);
     }
 
 
     setNightMode() {
         this.scene.background = new THREE.Color(0x000000);
+        this.scene.fog = new THREE.Fog(0x000000, 100, 1000);
         this.light.setAmbientLightIntensity(0.1);
         this.light.setHemisphericLightIntensity(0.2);
         this.light.setHemisphericLightColors(0x000000, 0x080808);
@@ -212,6 +304,7 @@ export class Environment {
             const fireflyCluster = generateFireflyCluster(this.scene, 10, 0xffff00, clusterPosition);
             this.fireflyClusters.push(fireflyCluster);
         }
+        this.light.setDirectionalLightIntensity(0.5);
     }
 
 }
