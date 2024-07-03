@@ -2,15 +2,12 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { CharacterControls } from '../controls/characterControls.js'; // Sesuaikan path sesuai struktur proyek
 import Ammo from 'ammo.js';
-import { Light } from '../utils/lighting.js';
 
 export class Character {
     constructor(scene, camera, orbitControls, physicsWorld, scale = 5, position = { x: 0, y: -2.5, z: -70 }, rotationY = Math.PI) {
         this.scene = scene;
         this.camera = camera;
         this.orbitControls = orbitControls;
-        // this.light = new Light(scene);
-        // this.light.createDirectionalLight({ x: 0, y: 10, z: 10 }, 0.5);
 
         this.characterControlsPromise = new Promise((resolve, reject) => {
             const loader = new GLTFLoader();
@@ -22,9 +19,6 @@ export class Character {
                 this.model.scale.set(scale, scale, scale);
                 this.model.position.set(position.x, position.y, position.z);
                 this.model.rotation.y = rotationY;
-
-                // this.model.add(this.light.directionalLight);
-                // this.model.add(this.light.directionalLight.target);
 
                 this.scene.add(this.model);
 
@@ -54,7 +48,7 @@ export class Character {
         transform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
         const motionState = new Ammo.btDefaultMotionState(transform);
 
-        const colShape = new Ammo.btBoxShape(new Ammo.btVector3(0.5, 0.5, 0.5));
+        const colShape = new Ammo.btBoxShape(new Ammo.btVector3(5, 0.5, 5));
         colShape.setMargin(100);
         const localInertia = new Ammo.btVector3(0, 0, 0);
         colShape.calculateLocalInertia(1, localInertia);
@@ -64,6 +58,7 @@ export class Character {
         rbInfo.set_m_angularSleepingThreshold(0); // Atur sleep threshold angular ke nilai yang sesuai
         this.body = new Ammo.btRigidBody(rbInfo);
 
+        this.body.setDamping(0.0, 0.0); // Atur nilai damping linear dan angular
 
         // Set the character as a kinematic object to prevent falling
         this.body.setActivationState(Ammo.btCollisionObject.DISABLE_DEACTIVATION);
@@ -172,5 +167,4 @@ export class Character {
             }
         }
     }
-
 }
