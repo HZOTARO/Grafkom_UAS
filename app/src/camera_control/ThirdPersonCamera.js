@@ -1,25 +1,29 @@
+import { Vector3 } from "three";
 import { CameraBase } from "./CameraBase";
 
 export class ThirdPersonCamera extends CameraBase{
     constructor(camera, pos){
         super(camera, pos);
 
-        this.distance = 20;
+        this.offset = new Vector3(0,10,0);
+
+        this.distance = 25;
         this.ALPHA = -Math.PI * 0.75;
 
-        this.zoomSpeed = 1;
-        this.minZoom = 1;
-        this.maxZoom = 1000;
+        this.zoomSpeed = 10;
+        this.minZoom = 10;
+        this.maxZoom = 100;
 
-        this.maxALPHA = -Math.PI * 0.5;
-        this.minALPHA = -Math.PI * 1;
+        this.maxALPHA = -Math.PI * 0.3;
+        this.minALPHA = -Math.PI * 0.8;
     }
 
     updateRotate(dt){
-        const targetPosition = this.position;
+        const targetPosition = new Vector3().copy(this.position);
         const position = this.camera.position;
 
-        position.setFromSphericalCoords( -this.distance, this.ALPHA, this.THETA ).add( targetPosition );
+        targetPosition.add(this.offset);
+        position.setFromSphericalCoords( -this.distance, this.ALPHA, this.THETA ).add( targetPosition ).add(this.offset);
         
         this.camera.lookAt( targetPosition );
     }

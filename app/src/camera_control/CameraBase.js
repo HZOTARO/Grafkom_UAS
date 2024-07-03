@@ -22,7 +22,7 @@ export class CameraBase{
         this.mouseDown = false;
         this.deltaRotate = new Euler(0,0,0);
         this.THETA = 0;
-        this.rotationSpeed = 10;        
+        this.rotationSpeed = 1;        
         
         this.bindControl();
         
@@ -98,18 +98,18 @@ export class CameraBase{
     }
 
     onMouseMove(e){
-        if (this.mouseDown) {
+        // if (this.mouseDown) {
             const deltaX = (e.movementX || e.mozMovementX || e.webkitMovementX || 0) * 0.01;
             const deltaY = (e.movementY || e.mozMovementY || e.webkitMovementY || 0) * 0.01;
             this.THETA -= deltaX;
             this.ALPHA -= deltaY;
 
             this.ALPHA = Math.max(Math.min(this.maxALPHA, this.ALPHA), this.minALPHA)
-        }
+        // }
     }
 
     onMouseWheel(e){
-        this.distance = Math.min(Math.max(this.minZoom, (this.distance + this.zoomSpeed * (e.deltaY / 10))), this.maxZoom);
+        this.distance = Math.min(Math.max(this.minZoom, (this.distance + this.zoomSpeed * (e.deltaY / 100))), this.maxZoom);
     }
     
     bindControl(){

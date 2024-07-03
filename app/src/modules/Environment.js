@@ -49,12 +49,12 @@ export class Environment {
     runGeneration() {
         createGround(this.scene); // Use createGround function from Ground.js
         this.character = new Character(this.scene, this.camera, this.orbitControls, this.physicsWorld);
-        this.character.characterControlsPromise.then((controls) => {
-            this.characterControls = controls;
-            console.log('CharacterControls initialized', this.characterControls);
-        }).catch((error) => {
-            console.error('Failed to initialize character controls:', error);
-        });
+        // this.character.characterControlsPromise.then((controls) => {
+        //     this.characterControls = controls;
+        //     console.log('CharacterControls initialized', this.characterControls);
+        // }).catch((error) => {
+        //     console.error('Failed to initialize character controls:', error);
+        // });
         this.camp = new Camp(this.scene);
         this.platform = new Wall(this.scene, this.physicsWorld, { x: 5000, y: 3, z: 5000 }, { x: 0, y: -4.505, z: 0 });
         this.wall1 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 1000 }, { x: 14, y: 5, z: -620 });
@@ -109,14 +109,14 @@ export class Environment {
             this.physicsWorld.stepSimulation(delta, 10);
         }
 
-        if (this.isFlying) {
-            this.handleFlyControls(delta);
-        } else {
-            if (this.characterControls) {
-                this.characterControls.update(delta, this.keysPressed);
-            }
-            this.orbitControls.update();
-        }
+        // if (this.isFlying) {
+        //     this.handleFlyControls(delta);
+        // } else {
+        //     if (this.characterControls) {
+        //         this.characterControls.update(delta, this.keysPressed);
+        //     }
+        //     this.orbitControls.update();
+        // }
 
         this.character.update(delta);
 

@@ -2,15 +2,19 @@ import * as THREE from 'three';
 import { FirstPersonCamera } from '../camera_control/FirstPersonCamera';
 import { ThirdPersonCamera } from '../camera_control/ThirdPersonCamera';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 export class Player{
     constructor(scene, camera){
+        this.state = 'Idle';
+        this.thirdPerson = true;
         this.scene = scene;
         this.camera = camera;
-        this.mesh = null;
+        this.model = null;
         this.position = new THREE.Vector3(0,0,0);
-        this.dir = new THREE.Vector3(0,0,-1)
+        this.dir = new THREE.Vector3(0,0,-1);
         this.animations = {};
+        this.mixer = null;
         
         document.addEventListener("keypress", (e) => this.onKeyPressed(e), false);
 
@@ -27,12 +31,17 @@ export class Player{
                 this.cameraControl = new ThirdPersonCamera( this.camera, this.position );
                 this.cameraControl.movementSpeed = 10;
                 this.cameraControl.rotationSpeed = 1;
+                this.thirdPerson = true;
                 break;
                 
                 case 'F':
-                this.cameraControl = new FirstPersonCamera( this.camera, this.position );
+                this.cameraControl = new FirstPersonCamera( this.camera, new THREE.Vector3(0,3,0).add(this.position) );
                 this.cameraControl.movementSpeed = 10;
                 this.cameraControl.rotationSpeed = 1;
+                this.thirdPerson = false;
+                this.mixer.stopAllAction();
+                this.animations.get('Poses').play();
+                this.state = 'Idle';
                 break;
         
             default:
@@ -41,47 +50,53 @@ export class Player{
     }
 
     loadModel(){
-        var loader = new FBXLoader();
-        loader.setPath('./asset/');
-        loader.load('Dwarf Idle.fbx', (fbx) => {
-            fbx.scale.setScalar(0.01);
-            fbx.traverse(c => {
-              c.castShadow = true;
+        const loader = new GLTFLoader();
+        loader.load('./asset/Lumberjack.glb', (gltf) => {
+            this.model = gltf.scene;
+            this.model.traverse((object) => {
+                if (object.isMesh) object.castShadow = true;
             });
-            this.mesh = fbx;
-            this.scene.add(this.mesh);
-            this.mesh.rotation.y += Math.PI/2;
-            
-            this.mixer = new THREE.AnimationMixer(this.mesh);
-            
-            var onLoad = (animName, anim) => {
-                const clip = anim.animations[0];
-                const action = this.mixer.clipAction(clip);
-          
-                this.animations[animName] = {
-                    clip: clip,
-                    action: action,
-                };
-            };
-            
-            const loader = new FBXLoader();
-            loader.setPath('./asset/');
-            loader.load('Dwarf Idle.fbx', (fbx) => { onLoad('idle', fbx) });
-            loader.load('Sword And Shield Run.fbx', (fbx) => { onLoad('run', fbx) });
-        });
+            this.model.scale.set(1,1,1);
+            this.model.position.set(0,0,0);
+            // this.model.rotation.y = rotationY;
+            this.scene.add(this.model);
+            const gltfAnimations = gltf.animations;
+            this.mixer = new THREE.AnimationMixer(this.model);
+            this.animations = new Map();
+            gltfAnimations.filter(a => a.name !== 'A-Pose').forEach((a) => {
+                this.animations.set(a.name, this.mixer.clipAction(a));
+            });
+        })
     }
 
     update(dt){
         this.cameraControl.update( dt );
-        if(this.mesh!=null){
-            this.mesh.position.copy(this.cameraControl.position);
-            // this.mesh.rotation.set(0, this.cameraControl.THETA - Math.PI,0);
 
-            // const dir = new THREE.Vector3()
-            if(!this.cameraControl.idle){
-                this.dir.copy(this.mesh.position).add(this.cameraControl.deltaMove).multiplyScalar(1);
+        if(this.model!=null){
+            if(this.thirdPerson){
+                if(this.state != 'Idle' && this.cameraControl.idle){
+                    this.animations.get('Walk').fadeOut(1);
+                    this.animations.get('Poses').fadeIn(1).play();
+                    this.state = 'Idle';
+                }else if(this.state != 'Walk' && !this.cameraControl.idle){
+                    this.mixer.stopAllAction();
+                    this.animations.get('Walk').fadeIn(1).play();
+                    this.state = 'Walk';
+                }
+
+                this.model.position.copy(this.cameraControl.position);
+                if(!this.cameraControl.idle){
+                    this.dir.copy(this.model.position).add(this.cameraControl.deltaMove).multiplyScalar(1);
+                }
+                this.model.lookAt(this.dir);
             }
-            this.mesh.lookAt(this.dir);
+
+            if(this.mixer){
+                this.mixer.update(dt);
+            }
+            // this.mesh.rotation.set(0, this.cameraControl.THETA - Math.PI,0);
+            
+            // const dir = new THREE.Vector3()
         }
     }
 }

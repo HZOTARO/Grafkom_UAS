@@ -5,12 +5,13 @@ export class FirstPersonCamera extends CameraBase{
     constructor(camera, pos){
         super(camera, pos);
 
+        this.movementSpeed = 100
         this.distance = 0;
         this.ALPHA = -Math.PI/2;
 
-        this.zoomSpeed = -1;
+        this.zoomSpeed = -10;
         this.minZoom = 0;
-        this.maxZoom = 100;
+        this.maxZoom = 1000;
 
         this.maxALPHA = -Math.PI * 0.25;
         this.minALPHA = -Math.PI * 0.75;
@@ -29,6 +30,7 @@ export class FirstPersonCamera extends CameraBase{
     }
 
     updatePos(dt){
+        this.move.f = true;
         super.updatePos(dt);
 
         // this.deltaMove.y = 0;
