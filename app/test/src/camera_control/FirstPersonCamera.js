@@ -4,6 +4,7 @@ export class FirstPersonCamera{
     constructor(camera, pos){
         this.camera = camera;
         
+        this.distance = 0;
         this.position = pos;
         this.camera.position.set(...this.position);
         this.move = {
@@ -99,6 +100,10 @@ export class FirstPersonCamera{
             this.ALPHA = Math.max(Math.min(-Math.PI * 0.25, this.ALPHA), -Math.PI * 0.75)
         }
     }
+
+    onMouseWheel(e){
+        this.distance = Math.min(Math.max(0, (this.distance - (e.deltaY / 100))), 10);
+    }
     
     bindControl(){
         document.addEventListener("keydown", (e) => this.onKeyDown(e), false);
@@ -106,7 +111,7 @@ export class FirstPersonCamera{
         document.addEventListener("mousedown", (e) => this.onMouseDown(e), false);
         document.addEventListener("mouseup", (e) => this.onMouseUp(e), false);
         document.addEventListener("mousemove", (e) => this.onMouseMove(e), false);
-        // document.addEventListener("wheel", (e) => this.onMouseWheel(e), false);
+        document.addEventListener("wheel", (e) => this.onMouseWheel(e), false);
     }
     
     update(dt) {
@@ -137,6 +142,9 @@ export class FirstPersonCamera{
         this.deltaMove.normalize();
         this.deltaMove.multiplyScalar(dt * this.movementSpeed);
         this.position.add(this.deltaMove);
-        this.camera.position.set(...this.position);
+
+        const posAftZoom = new Vector3().add(this.position);
+        const dir = new Vector3().setFromSphericalCoords( 1, this.ALPHA, this.THETA );
+        this.camera.position.set(...(posAftZoom.add(dir.multiplyScalar(this.distance))));
     }
 }

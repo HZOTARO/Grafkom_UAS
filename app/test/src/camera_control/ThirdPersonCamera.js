@@ -100,6 +100,10 @@ export class ThirdPersonCamera{
             this.ALPHA = Math.max(Math.min(-Math.PI * 0.5, this.ALPHA), -Math.PI * 1)
         }
     }
+
+    onMouseWheel(e){
+        this.distance = Math.min(Math.max(1, (this.distance + (e.deltaY / 100))), 100);
+    }
     
     bindControl(){
         document.addEventListener("keydown", (e) => this.onKeyDown(e), false);
@@ -107,7 +111,7 @@ export class ThirdPersonCamera{
         document.addEventListener("mousedown", (e) => this.onMouseDown(e), false);
         document.addEventListener("mouseup", (e) => this.onMouseUp(e), false);
         document.addEventListener("mousemove", (e) => this.onMouseMove(e), false);
-        // document.addEventListener("wheel", (e) => this.onMouseWheel(e), false);
+        document.addEventListener("wheel", (e) => this.onMouseWheel(e), false);
     }
     
     update(dt) {

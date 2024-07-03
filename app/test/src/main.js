@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 import { FirstPersonCamera } from './camera_control/FirstPersonCamera';
 import { ThirdPersonCamera } from './camera_control/ThirdPersonCamera';
+import { Environment } from './scene/environtment';
 
-var scene, camera, renderer, firstPerson_control;
-var cube, plane;
+var scene, camera, renderer, cameraControl;
+var environment;
 
 const clock = new THREE.Clock();
 
@@ -15,43 +16,52 @@ function init(){
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.setAnimationLoop( animate );
     document.body.appendChild( renderer.domElement );
-    
-    const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-    const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-    cube = new THREE.Mesh( geometry, material );
-    scene.add( cube );
-    
-    plane = new THREE.Mesh( 
-        new THREE.PlaneGeometry( 10, 10 ), 
-        new THREE.MeshBasicMaterial( { color: 0x00ffff } ) );
-    plane.position.y = -0.5;
-    plane.rotateX(-Math.PI/2);
-    scene.add( plane );
+
+    environment = new Environment(scene);
     
     // firstPerson_control = new FirstPersonCamera( camera, new THREE.Vector3(0,0,5) );
     // firstPerson_control.movementSpeed = 10;
     // firstPerson_control.rotationSpeed = 1;
 
-    firstPerson_control = new ThirdPersonCamera( camera, cube.position );
-    firstPerson_control.movementSpeed = 10;
-    firstPerson_control.rotationSpeed = 1;
+    cameraControl = new ThirdPersonCamera( camera, environment.cube.position );
+    cameraControl.movementSpeed = 10;
+    cameraControl.rotationSpeed = 1;
     
+    document.addEventListener("keypress", (e) => onKeyPressed(e), false);
     window.addEventListener( 'resize', onWindowResize );
     }
     
-    function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
+function onKeyPressed(e){
+    switch (e.key.toUpperCase()) {
+        case 'T':
+            cameraControl = new ThirdPersonCamera( camera, environment.cube.position );
+            cameraControl.movementSpeed = 10;
+            cameraControl.rotationSpeed = 1;
+            break;
         
-        renderer.setSize( window.innerWidth, window.innerHeight );
-        
+        case 'F':
+            cameraControl = new FirstPersonCamera( camera, new THREE.Vector3(0,0,5) );
+            cameraControl.movementSpeed = 10;
+            cameraControl.rotationSpeed = 1;
+            break;
+    
+        default:
+            break;
+    }
+}
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    
     // firstPerson_control.handleResize();
 }
 
 function animate() {
-    firstPerson_control.update( clock.getDelta() );
-	cube.rotation.x += 0.01;
-	cube.rotation.y += 0.01;
+    cameraControl.update( clock.getDelta() );
+
+    environment.update();
 
 	renderer.render( scene, camera );
 }
