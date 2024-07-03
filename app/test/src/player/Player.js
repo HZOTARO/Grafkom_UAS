@@ -9,6 +9,7 @@ export class Player{
         this.camera = camera;
         this.mesh = null;
         this.position = new THREE.Vector3(0,0,0);
+        this.dir = new THREE.Vector3(0,0,-1)
         this.animations = {};
         
         document.addEventListener("keypress", (e) => this.onKeyPressed(e), false);
@@ -74,7 +75,13 @@ export class Player{
         this.cameraControl.update( dt );
         if(this.mesh!=null){
             this.mesh.position.copy(this.cameraControl.position);
-            this.mesh.rotation.set(0, this.cameraControl.THETA + Math.PI,0);
+            // this.mesh.rotation.set(0, this.cameraControl.THETA - Math.PI,0);
+
+            // const dir = new THREE.Vector3()
+            if(!this.cameraControl.idle){
+                this.dir.copy(this.mesh.position).add(this.cameraControl.deltaMove).multiplyScalar(1);
+            }
+            this.mesh.lookAt(this.dir);
         }
     }
 }

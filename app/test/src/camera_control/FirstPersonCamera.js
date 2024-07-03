@@ -31,6 +31,11 @@ export class FirstPersonCamera extends CameraBase{
     updatePos(dt){
         super.updatePos(dt);
 
+        // this.deltaMove.y = 0;
+        this.deltaMove.normalize();
+        this.deltaMove.multiplyScalar(dt * this.movementSpeed);
+        this.position.add(this.deltaMove);
+
         const posAftZoom = new Vector3().add(this.position);
         const dir = new Vector3().setFromSphericalCoords( 1, this.ALPHA, this.THETA );
         this.camera.position.set(...(posAftZoom.add(dir.multiplyScalar(this.distance))));
