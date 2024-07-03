@@ -64,7 +64,7 @@ export class Environment {
         this.wall5 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 200 }, { x: -135, y: 5, z: -20 });
         this.wall6 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 200 }, { x: 100, y: 5, z: -20 });
         this.wall6 = new Wall(this.scene, this.physicsWorld, {x:250, y:30, z:5}, {x:-20, y:5, z:80});
-        this.campWall = new Wall(this.scene, this.physicsWorld, {x:120, y:100, z:100}, {x:15, y:0, z:-10});
+        this.campWall = new Wall(this.scene, this.physicsWorld, {x:120, y:100, z:110}, {x:15, y:0, z:-10});
 
 
         this.fence1 = new Fence(this.scene, {x:30, y:-3, z:-140}, 20, Math.PI/4);
