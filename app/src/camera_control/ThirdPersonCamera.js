@@ -4,12 +4,12 @@ export class ThirdPersonCamera extends CameraBase{
     constructor(camera, pos){
         super(camera, pos);
 
-        this.distance = 10;
+        this.distance = 20;
         this.ALPHA = -Math.PI * 0.75;
 
         this.zoomSpeed = 1;
         this.minZoom = 1;
-        this.maxZoom = 100;
+        this.maxZoom = 1000;
 
         this.maxALPHA = -Math.PI * 0.5;
         this.minALPHA = -Math.PI * 1;
@@ -26,6 +26,12 @@ export class ThirdPersonCamera extends CameraBase{
 
     updatePos(dt){
         super.updatePos(dt);
+        
+        this.deltaMove.y = 0;
+        this.deltaMove.normalize();
+        this.deltaMove.multiplyScalar(dt * this.movementSpeed);
+        this.position.add(this.deltaMove);
+
         this.camera.position.set(...this.position);
     }
 }

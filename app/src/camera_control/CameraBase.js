@@ -2,6 +2,7 @@ import { Euler, Vector3 } from "three";
 
 export class CameraBase{
     constructor(camera, pos){
+        this.idle = true;
         this.camera = camera;
         
         this.position = pos;
@@ -16,12 +17,12 @@ export class CameraBase{
             d:false
         }
         this.deltaMove = new Vector3(0,0,0);
-        this.movementSpeed = 10;
+        this.movementSpeed = 50;
         
         this.mouseDown = false;
         this.deltaRotate = new Euler(0,0,0);
         this.THETA = 0;
-        this.rotationSpeed = 1;        
+        this.rotationSpeed = 10;        
         
         this.bindControl();
         
@@ -108,7 +109,7 @@ export class CameraBase{
     }
 
     onMouseWheel(e){
-        this.distance = Math.min(Math.max(this.minZoom, (this.distance + this.zoomSpeed * (e.deltaY / 100))), this.maxZoom);
+        this.distance = Math.min(Math.max(this.minZoom, (this.distance + this.zoomSpeed * (e.deltaY / 10))), this.maxZoom);
     }
     
     bindControl(){
@@ -121,6 +122,11 @@ export class CameraBase{
     }
     
     update(dt) {
+        if(this.move.f||this.move.b||this.move.l||this.move.r){
+            this.idle = false;
+        }else{
+            this.idle = true;
+        }
         this.updatePos(dt);
         this.updateRotate(dt);
     }
@@ -128,11 +134,7 @@ export class CameraBase{
     updatePos(dt){
         this.deltaMove.x = this.move.l * -1 + this.move.r * 1;
         this.deltaMove.z = this.move.b * 1 + this.move.f * -1;
-        // this.deltaMove.y = this.move.u * 1 + this.move.d * -1;
+        this.deltaMove.y = this.move.u * 1 + this.move.d * -1;
         this.deltaMove.applyEuler(this.camera.rotation);
-        this.deltaMove.y = 0;
-        this.deltaMove.normalize();
-        this.deltaMove.multiplyScalar(dt * this.movementSpeed);
-        this.position.add(this.deltaMove);
     }
 }

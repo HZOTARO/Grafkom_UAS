@@ -10,7 +10,7 @@ export class FirstPersonCamera extends CameraBase{
 
         this.zoomSpeed = -1;
         this.minZoom = 0;
-        this.maxZoom = 10;
+        this.maxZoom = 100;
 
         this.maxALPHA = -Math.PI * 0.25;
         this.minALPHA = -Math.PI * 0.75;
@@ -30,6 +30,11 @@ export class FirstPersonCamera extends CameraBase{
 
     updatePos(dt){
         super.updatePos(dt);
+
+        // this.deltaMove.y = 0;
+        this.deltaMove.normalize();
+        this.deltaMove.multiplyScalar(dt * this.movementSpeed);
+        this.position.add(this.deltaMove);
 
         const posAftZoom = new Vector3().add(this.position);
         const dir = new Vector3().setFromSphericalCoords( 1, this.ALPHA, this.THETA );
