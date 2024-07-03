@@ -1,13 +1,20 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { CharacterControls } from '../controls/characterControls.js'; // Sesuaikan path sesuai struktur proyek
+import { CharacterControls } from '../controls/characterControls.js'; // Adjust path according to project structure
 import Ammo from 'ammo.js';
+import { FirstPersonCamera } from "../camera_control/FirstPersonCamera.js";
+import { ThirdPersonCamera } from "../camera_control/ThirdPersonCamera.js";
 
 export class Character {
     constructor(scene, camera, orbitControls, physicsWorld, scale = 5, position = { x: 0, y: -2.5, z: -70 }, rotationY = Math.PI) {
         this.scene = scene;
         this.camera = camera;
+        this.position = new THREE.Vector3(position.x, position.y, position.z);
+        this.physicsWorld = physicsWorld;
         this.orbitControls = orbitControls;
+        this.initInput(); // Initialize input events
+
+        document.addEventListener("keypress", (e) => this.onKeyPressed(e), false);
 
         this.characterControlsPromise = new Promise((resolve, reject) => {
             const loader = new GLTFLoader();
@@ -43,22 +50,26 @@ export class Character {
             });
         });
 
+        this.cameraControl = new ThirdPersonCamera(this.camera, this.position);
+        this.cameraControl.movementSpeed = 10;
+        this.cameraControl.rotationSpeed = 1;
+
         const transform = new Ammo.btTransform();
         transform.setIdentity();
-        transform.setOrigin(new Ammo.btVector3(position.x, position.y, position.z));
+        transform.setOrigin(new Ammo.btVector3(this.position.x, this.position.y, this.position.z));
         const motionState = new Ammo.btDefaultMotionState(transform);
 
         const colShape = new Ammo.btBoxShape(new Ammo.btVector3(5, 0.5, 5));
-        colShape.setMargin(100);
+        colShape.setMargin(0.05);
         const localInertia = new Ammo.btVector3(0, 0, 0);
         colShape.calculateLocalInertia(1, localInertia);
 
         const rbInfo = new Ammo.btRigidBodyConstructionInfo(1, motionState, colShape, localInertia);
-        rbInfo.set_m_linearSleepingThreshold(0); // Atur sleep threshold ke nilai yang sesuai
-        rbInfo.set_m_angularSleepingThreshold(0); // Atur sleep threshold angular ke nilai yang sesuai
+        rbInfo.set_m_linearSleepingThreshold(0); // Set sleep threshold to appropriate values
+        rbInfo.set_m_angularSleepingThreshold(0); // Set sleep threshold to appropriate values
         this.body = new Ammo.btRigidBody(rbInfo);
 
-        this.body.setDamping(0.0, 0.0); // Atur nilai damping linear dan angular
+        this.body.setDamping(0.0, 0.0); // Set linear and angular damping
 
         // Set the character as a kinematic object to prevent falling
         this.body.setActivationState(Ammo.btCollisionObject.DISABLE_DEACTIVATION);
@@ -76,8 +87,26 @@ export class Character {
 
         this.velocity = new Ammo.btVector3(0, 0, 0);
         this.direction = new THREE.Vector3();
+    }
 
-        this.initInput();
+    onKeyPressed(e) {
+        switch (e.key.toUpperCase()) {
+            case 'T':
+                this.cameraControl = new ThirdPersonCamera(this.camera, this.position);
+                this.cameraControl.movementSpeed = 10;
+                this.cameraControl.rotationSpeed = 1;
+                break;
+
+            case 'P':
+                this.cameraControl = new FirstPersonCamera(this.camera, this.position);
+                this.cameraControl.movementSpeed = 10;
+                this.cameraControl.rotationSpeed = 1;
+                console.log('Switched to First Person Camera');
+                break;
+
+            default:
+                break;
+        }
     }
 
     initInput() {
@@ -123,48 +152,57 @@ export class Character {
                 case 'KeyA':
                     this.input.right = false;
                     break;
+                case 'Space':
+                    this.input.jump = false;
+                    break;
             }
         });
     }
 
-    update(delta) {
-        if (this.model) {
-            const force = 5 * 4;
-            this.direction.set(0, 0, 0);
+    update(dt) {
+        this.characterControlsPromise.then(() => {
+            this.cameraControl.update(dt);
+            if (this.model != null) {
+                // Simpan posisi saat ini karakter sebelum diperbarui
+                const currentPosition = this.model.position.clone();
 
-            if (this.input.forward) {
-                this.direction.z -= force;
-            }
-            if (this.input.backward) {
-                this.direction.z += force;
-            }
-            if (this.input.left) {
-                this.direction.x -= force;
-            }
-            if (this.input.right) {
-                this.direction.x += force;
-            }
+                // Update posisi dan rotasi karakter sesuai dengan kamera
+                this.model.position.copy(this.cameraControl.position);
+                this.model.rotation.set(0, this.cameraControl.THETA + Math.PI, 0);
 
-            this.direction.normalize().multiplyScalar(force);
-            this.velocity.setValue(this.direction.x, this.velocity.y(), this.direction.z);
+                // Hitung perbedaan vektor antara posisi baru dan posisi saat ini
+                this.direction.copy(this.model.position).sub(currentPosition).normalize();
 
-            this.body.activate(); // Aktifkan karakter agar tidak tidur
-            this.body.setLinearVelocity(this.velocity);
+                // Set kecepatan berdasarkan arah yang dihitung
+                const speed = 0.1; // Atur kecepatan sesuai kebutuhan
+                this.velocity.copy(this.direction).multiplyScalar(speed);
 
-            const ms = this.body.getMotionState();
-            if (ms) {
-                const transform = new Ammo.btTransform();
-                ms.getWorldTransform(transform);
-                const origin = transform.getOrigin();
-                const rotation = transform.getRotation();
-                this.model.position.set(origin.x(), origin.y(), origin.z());
-                this.model.quaternion.set(rotation.x(), rotation.y(), rotation.z(), rotation.w());
+                // Aktifkan tubuh agar tidak tidur dan atur kecepatan linier
+                this.body.activate();
+                this.body.setLinearVelocity(this.velocity);
 
-                if (this.direction.lengthSq() > 0) {
-                    const angle = Math.atan2(this.direction.x, this.direction.z);
-                    this.model.rotation.y = angle;
+                // Sinkronisasi posisi dan rotasi model dengan tubuh fisik
+                const ms = this.body.getMotionState();
+                if (ms) {
+                    const transform = new Ammo.btTransform();
+                    ms.getWorldTransform(transform);
+                    const origin = transform.getOrigin();
+                    const rotation = transform.getRotation();
+                    this.model.position.set(origin.x(), origin.y(), origin.z());
+                    this.model.quaternion.set(rotation.x(), rotation.y(), rotation.z(), rotation.w());
+
+                    // Arah karakter menghadap arah gerakan horizontal
+                    if (this.direction.lengthSq() > 0) {
+                        const angle = Math.atan2(this.direction.x, this.direction.z);
+                        this.model.rotation.y = angle;
+                    }
                 }
             }
-        }
+        }).catch((error) => {
+            console.error('Error updating character controls:', error);
+        });
     }
+
+
+
 }

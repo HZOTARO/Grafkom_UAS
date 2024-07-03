@@ -60,35 +60,35 @@ export class CharacterControls {
 
         this.mixer.update(delta);
 
-        if (this.currentAction === 'Walk' || this.currentAction === 'Walk') {
-            // calculate towards camera direction
-            const angleYCameraDirection = Math.atan2(
-                (this.camera.position.x - this.model.position.x), 
-                (this.camera.position.z - this.model.position.z)
-            );
-            // diagonal movement angle offset
-            const directionOffset = this.directionOffset(keysPressed);
-
-            // rotate model
-            this.rotateQuarternion.setFromAxisAngle(this.rotateAngle, angleYCameraDirection + directionOffset);
-            this.model.quaternion.rotateTowards(this.rotateQuarternion, 0.2);
-
-            // calculate direction
-            this.camera.getWorldDirection(this.walkDirection);
-            this.walkDirection.y = 0;
-            this.walkDirection.normalize();
-            this.walkDirection.applyAxisAngle(this.rotateAngle, directionOffset);
-
-            // run/walk velocity
-            const velocity = this.currentAction === 'Walk' ? this.runVelocity : this.walkVelocity;
-
-            // move model & camera
-            const moveX = -this.walkDirection.x * velocity * delta;
-            const moveZ = -this.walkDirection.z * velocity * delta;
-            this.model.position.x += moveX;
-            this.model.position.z += moveZ;
-            this.updateCameraTarget(moveX, moveZ);
-        }
+        // if (this.currentAction === 'Walk' || this.currentAction === 'Walk') {
+        //     // calculate towards camera direction
+        //     const angleYCameraDirection = Math.atan2(
+        //         (this.camera.position.x - this.model.position.x),
+        //         (this.camera.position.z - this.model.position.z)
+        //     );
+        //     // diagonal movement angle offset
+        //     const directionOffset = this.directionOffset(keysPressed);
+        //
+        //     // rotate model
+        //     this.rotateQuarternion.setFromAxisAngle(this.rotateAngle, angleYCameraDirection + directionOffset);
+        //     this.model.quaternion.rotateTowards(this.rotateQuarternion, 0.2);
+        //
+        //     // calculate direction
+        //     this.camera.getWorldDirection(this.walkDirection);
+        //     this.walkDirection.y = 0;
+        //     this.walkDirection.normalize();
+        //     this.walkDirection.applyAxisAngle(this.rotateAngle, directionOffset);
+        //
+        //     // run/walk velocity
+        //     const velocity = this.currentAction === 'Walk' ? this.runVelocity : this.walkVelocity;
+        //
+        //     // move model & camera
+        //     const moveX = -this.walkDirection.x * velocity * delta;
+        //     const moveZ = -this.walkDirection.z * velocity * delta;
+        //     this.model.position.x += moveX;
+        //     this.model.position.z += moveZ;
+        //     this.updateCameraTarget(moveX, moveZ);
+        // }
     }
 
     updateCameraTarget(moveX, moveZ) {

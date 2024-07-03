@@ -18,7 +18,7 @@ export class Wall {
         this.mesh.position.set(position.x, position.y, position.z);
         this.mesh.castShadow = true;  // Enable casting shadows
         this.mesh.receiveShadow = true;  // Enable receiving shadows
-        this.mesh.visible = false;
+        this.mesh.visible = true;
         scene.add(this.mesh);
 
         let wallShape = new Ammo.btBoxShape(new Ammo.btVector3(size.x / 2, size.y / 2, size.z / 2));
