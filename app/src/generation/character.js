@@ -15,7 +15,10 @@ export class Character {
             loader.load('../../asset/model/Character/Lumberjack.glb', (gltf) => {
                 this.model = gltf.scene;
                 this.model.traverse((object) => {
-                    if (object.isMesh) object.castShadow = true;
+                    if (object.isMesh){
+                        object.castShadow = true;
+                        object.receiveShadow = true;
+                    }
                 });
                 this.model.scale.set(scale, scale, scale);
                 this.model.position.set(position.x, position.y, position.z);
@@ -23,6 +26,8 @@ export class Character {
 
             
                 this.scene.add(this.model);
+
+                this.addSpotLight();
             
                 const gltfAnimations = gltf.animations;
                 const mixer = new THREE.AnimationMixer(this.model);
@@ -124,6 +129,15 @@ export class Character {
         });
     }
 
+    addSpotLight() {
+        this.light = new Light(this.scene);
+        this.light.createSpotLight({ x: 0, y: 10, z: 0 }, this.model.position, 1000, 100, Math.PI / 8, 0.1, 2);
+
+        this.light.spotLight.target = this.model;
+        this.scene.add(this.light.spotLight.target);
+        this.light.spotLight.position.set(0, 10, 0);
+    }
+
     update(delta) {
         if (this.model) {
             const force = 5 * 4;
@@ -161,6 +175,7 @@ export class Character {
                     this.model.rotation.y = angle;
                 }
             }
+            this.light.spotLight.position.set(this.model.position.x, this.model.position.y + 20, this.model.position.z);
         }
     }
 }
