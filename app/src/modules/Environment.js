@@ -50,7 +50,7 @@ export class Environment {
         }).catch((error) => {
             console.error('Failed to initialize character controls:', error);
         });
-        this.camp = new Camp(this.scene, this.physicsWorld);
+        this.camp = new Camp(this.scene);
         this.platform = new Wall(this.scene, this.physicsWorld, { x: 5000, y: 3, z: 5000 }, { x: 0, y: -4.505, z: 0 });
         this.wall1 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 1000 }, { x: 14, y: 5, z: -620 });
         this.wall2 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 1000 }, { x: -70, y: 5, z: -620 });
@@ -172,19 +172,16 @@ export class Environment {
         this.light = new Light(this.scene);
         this.light.createAmbientLight(0.8);
         this.light.createHemisphericLight(0x87CEEB, 0x444444, 0.6);
-        // this.scene.add(this.light.ambientLight);
+        this.light.createDirectionalLight({ x: 100, y: 200, z: 100 }, 1);
+        this.scene.add(this.light.ambientLight);
+        this.scene.add(this.light.hemisphericLight);
+        this.scene.add(this.light.directionalLight);
 
-        // const ambientLight = new THREE.AmbientLight(0x404040);
-        // this.scene.add(ambientLight);
+        const helper = new THREE.DirectionalLightHelper(this.light.directionalLight, 10);
+        this.scene.add(helper);
 
-        // const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        // directionalLight.position.set(1, 1, 1).normalize();
-        // directionalLight.castShadow = true;
-        // directionalLight.shadow.mapSize.width = 2048;
-        // directionalLight.shadow.mapSize.height = 2048;
-        // directionalLight.shadow.camera.near = 0.5;
-        // directionalLight.shadow.camera.far = 500;
-        // this.scene.add(directionalLight);
+        const shadowCameraHelper = new THREE.CameraHelper(this.light.directionalLight.shadow.camera);
+        this.scene.add(shadowCameraHelper);
     }
 
     createButtons() {
@@ -294,16 +291,20 @@ export class Environment {
 
     setDayMode() {
         this.scene.background = new THREE.Color(0x87CEEB);
+        this.scene.fog = new THREE.Fog(0x87ceeb, 100, 1000);
         this.light.setAmbientLightIntensity(0.8);
         this.light.setHemisphericLightIntensity(0.6);
         this.light.setHemisphericLightColors(0x87CEEB, 0x444444);
+        this.light.setDirectionalLightIntensity(1);
     }
 
     setNightMode() {
         this.scene.background = new THREE.Color(0x000000);
+        this.scene.fog = new THREE.Fog(0x000000, 100, 1000);
         this.light.setAmbientLightIntensity(0.1);
         this.light.setHemisphericLightIntensity(0.2);
         this.light.setHemisphericLightColors(0x000000, 0x080808);
+        this.light.setDirectionalLightIntensity(0.5);
     }
 
 }
