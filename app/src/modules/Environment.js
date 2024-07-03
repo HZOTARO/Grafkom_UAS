@@ -294,7 +294,7 @@ export class Environment {
         this.scene.fog = new THREE.Fog(0x87ceeb, 100, 1000);
         this.light.setAmbientLightIntensity(0.8);
         this.light.setHemisphericLightIntensity(0.6);
-        this.light.setHemisphericLightColors(0x87CEEB, 0x444444);
+        // this.light.setHemisphericLightColors(0x87CEEB, 0x444444); //not working idk why
         this.light.setDirectionalLightIntensity(1);
     }
 
@@ -303,7 +303,7 @@ export class Environment {
         this.scene.fog = new THREE.Fog(0x000000, 100, 1000);
         this.light.setAmbientLightIntensity(0.1);
         this.light.setHemisphericLightIntensity(0.2);
-        this.light.setHemisphericLightColors(0x000000, 0x080808);
+        // this.light.setHemisphericLightColors(0x000000, 0x080808); //not working idk why
         this.light.setDirectionalLightIntensity(0.5);
     }
 
