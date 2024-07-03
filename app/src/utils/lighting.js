@@ -16,12 +16,12 @@ export class Light {
         this.directionalLight.castShadow = true;
 
         // Shadow settings
-        this.directionalLight.shadow.camera.top = 20;
-        this.directionalLight.shadow.camera.bottom = -20;
-        this.directionalLight.shadow.camera.left = -20;
-        this.directionalLight.shadow.camera.right = 20;
-        this.directionalLight.shadow.mapSize.width = 1024;
-        this.directionalLight.shadow.mapSize.height = 1024;
+        this.directionalLight.shadow.camera.top = 200;
+        this.directionalLight.shadow.camera.bottom = -200;
+        this.directionalLight.shadow.camera.left = -200;
+        this.directionalLight.shadow.camera.right = 200;
+        this.directionalLight.shadow.mapSize.width = 4096;
+        this.directionalLight.shadow.mapSize.height = 2096;
         this.directionalLight.shadow.camera.near = 0.5;
         this.directionalLight.shadow.camera.far = 500;
 
@@ -38,12 +38,13 @@ export class Light {
         this.spotLight.castShadow = true;
 
         // Shadow settings
-        this.spotLight.shadow.camera.top = 20;
-        this.spotLight.shadow.camera.bottom = -20;
-        this.spotLight.shadow.camera.left = -20;
-        this.spotLight.shadow.camera.right = 20;
-        this.spotLight.shadow.mapSize.width = 1024;
-        this.spotLight.shadow.mapSize.height = 1024;
+        const d = 20;
+        this.spotLight.shadow.camera.top = d;
+        this.spotLight.shadow.camera.bottom = -d;
+        this.spotLight.shadow.camera.left = -d;
+        this.spotLight.shadow.camera.right = d;
+        this.spotLight.shadow.mapSize.width = 2048;
+        this.spotLight.shadow.mapSize.height = 2048;
         this.spotLight.shadow.camera.near = 0.5;
         this.spotLight.shadow.camera.far = 500;
 
@@ -78,6 +79,12 @@ export class Light {
     setDirectionalLightPosition(position) {
         if (this.directionalLight) {
             this.directionalLight.position.set(position.x, position.y, position.z);
+        }
+    }
+
+    setDirectionalLightIntensity(intensity) {
+        if (this.directionalLight) {
+            this.directionalLight.intensity = intensity;
         }
     }
 
