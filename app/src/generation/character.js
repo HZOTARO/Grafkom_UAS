@@ -9,8 +9,6 @@ export class Character {
         this.scene = scene;
         this.camera = camera;
         this.orbitControls = orbitControls;
-        this.light = new Light(scene);
-        this.light.createDirectionalLight({ x: 0, y: 10, z: 10 }, 0.5);
 
         this.characterControlsPromise = new Promise((resolve, reject) => {
             const loader = new GLTFLoader();
@@ -23,8 +21,6 @@ export class Character {
                 this.model.position.set(position.x, position.y, position.z);
                 this.model.rotation.y = rotationY;
 
-                this.model.add(this.light.directionalLight);
-                this.model.add(this.light.directionalLight.target);
             
                 this.scene.add(this.model);
             
