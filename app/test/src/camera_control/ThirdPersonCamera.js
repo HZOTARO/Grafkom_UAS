@@ -26,6 +26,12 @@ export class ThirdPersonCamera extends CameraBase{
 
     updatePos(dt){
         super.updatePos(dt);
+        
+        this.deltaMove.y = 0;
+        this.deltaMove.normalize();
+        this.deltaMove.multiplyScalar(dt * this.movementSpeed);
+        this.position.add(this.deltaMove);
+
         this.camera.position.set(...this.position);
     }
 }
