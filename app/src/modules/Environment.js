@@ -14,6 +14,12 @@ import { Fence } from '../generation/Fence.js';
 import { Grass, generateGrass } from '../generation/Grass.js';
 import { Firefly, generateFireflyCluster } from '../generation/Firefly.js'; // Import Firefly
 import { Light } from '../utils/lighting.js';
+import { Fire } from '../generation/Fire.js';
+import { createGround } from '../generation/Ground.js'; // Import createGround
+import {createButtons} from "../utils/buttons.js";
+import {initEventListeners} from "../utils/eventlisteners.js";
+import {toggleMode} from "../utils/togglemode.js";
+import {handleFlyControls} from "../utils/flycontrolhandler.js";
 
 export class Environment {
     constructor() {
@@ -33,16 +39,15 @@ export class Environment {
         this.setupRenderer();
         this.setupControls();
         this.setupLighting();
-        this.createButtons();
+        createButtons(this);
 
         this.runGeneration();
-        this.initEventListeners();
+        initEventListeners(this);
         this.animate();
     }
 
     runGeneration() {
-        this.createGround();
-        // this.platform = new Platform(this.scene, physicsWorld);
+        createGround(this.scene); // Use createGround function from Ground.js
         this.character = new Character(this.scene, this.camera, this.orbitControls, this.physicsWorld);
         this.character.characterControlsPromise.then((controls) => {
             this.characterControls = controls;
@@ -50,7 +55,7 @@ export class Environment {
         }).catch((error) => {
             console.error('Failed to initialize character controls:', error);
         });
-        this.camp = new Camp(this.scene, this.physicsWorld);
+        this.camp = new Camp(this.scene);
         this.platform = new Wall(this.scene, this.physicsWorld, { x: 5000, y: 3, z: 5000 }, { x: 0, y: -4.505, z: 0 });
         this.wall1 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 1000 }, { x: 14, y: 5, z: -620 });
         this.wall2 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 1000 }, { x: -70, y: 5, z: -620 });
@@ -59,6 +64,7 @@ export class Environment {
         this.wall5 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 200 }, { x: -135, y: 5, z: -20 });
         this.wall6 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 200 }, { x: 100, y: 5, z: -20 });
         this.wall6 = new Wall(this.scene, this.physicsWorld, {x:250, y:30, z:5}, {x:-20, y:5, z:80});
+        this.campWall = new Wall(this.scene, this.physicsWorld, {x:120, y:100, z:120}, {x:15, y:0, z:0});
 
 
         this.fence1 = new Fence(this.scene, {x:30, y:-3, z:-140}, 20, Math.PI/4);
@@ -77,26 +83,20 @@ export class Environment {
         this.fence12 = new Fence(this.scene, {x:-100, y:-3, z:-140}, 20, -Math.PI/4);
 
         // Harusnya 5000, tapi biar render e ga lama
-        // generateTrees(this.scene, 2500, 1);
-        this.grass = new Grass(this.scene, {x:50, y:-3, z:90}, 30, 0);
+        // generateTrees(this.scene, 1000, 1);
         generateGrass(this.scene, 400, 30);
 
         // Create multiple firefly clusters at random positions
-        for (let i = 0; i < 5; i++) {
-            const clusterPosition = new THREE.Vector3(
-                Math.random() * 300 - 100,   // Random x position within a range
-                Math.random() * 10,     // Random y position within a range
-                Math.random() * 300 - 100    // Random z position within a range
-            );
-            const fireflyCluster = generateFireflyCluster(this.scene, 10, 0xffff00, clusterPosition);
-            this.fireflyClusters.push(fireflyCluster);
-        }
 
+
+
+        this.fire = new Fire(this.scene, {x:0, y:5, z:60}, 5, 5, 1000);
     }
 
     animate() {
         requestAnimationFrame(this.animate.bind(this));
         const delta = this.clock.getDelta();
+
 
         this.keysPressed = {
             Space: this.character.input.jump,
@@ -130,6 +130,8 @@ export class Environment {
             });
         }
 
+        this.fire.update(delta);
+
         this.renderer.render(this.scene, this.camera);
     }
     
@@ -158,138 +160,19 @@ export class Environment {
         document.addEventListener('click', () => {
             this.flyControls.lock();
         });
-
-        this.flyControls.addEventListener('lock', () => {
-            console.log('Pointer locked');
-        });
-
-        this.flyControls.addEventListener('unlock', () => {
-            console.log('Pointer unlocked');
-        });
     }
 
     setupLighting() {
         this.light = new Light(this.scene);
         this.light.createAmbientLight(0.8);
-        this.light.createHemisphericLight(0x87CEEB, 0x444444, 0.6);
-        // this.scene.add(this.light.ambientLight);
-
-        // const ambientLight = new THREE.AmbientLight(0x404040);
-        // this.scene.add(ambientLight);
-
-        // const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        // directionalLight.position.set(1, 1, 1).normalize();
-        // directionalLight.castShadow = true;
-        // directionalLight.shadow.mapSize.width = 2048;
-        // directionalLight.shadow.mapSize.height = 2048;
-        // directionalLight.shadow.camera.near = 0.5;
-        // directionalLight.shadow.camera.far = 500;
-        // this.scene.add(directionalLight);
-    }
-
-    createButtons() {
-        const flyBtn = this.createButton('Fly Mode (F)', '10px', '10px', () => this.toggleMode('fly'));
-        const walkBtn = this.createButton('Walk Mode (G)', '10px', '120px', () => this.toggleMode('walk'));
-        const dayBtn = this.createButton('Day Mode', '10px', '250px', () => this.setDayMode());
-        const nightBtn = this.createButton('Night Mode', '10px', '350px', () => this.setNightMode());
-        document.body.appendChild(flyBtn);
-        document.body.appendChild(walkBtn);
-        document.body.appendChild(dayBtn);
-        document.body.appendChild(nightBtn);
-    }
-
-    createButton(innerText, top, left, onClick) {
-        const button = document.createElement('button');
-        button.innerText = innerText;
-        button.style.position = 'absolute';
-        button.style.top = top;
-        button.style.left = left;
-        button.addEventListener('click', onClick);
-        return button;
-    }
-
-    createGround() {
-        const groundGeo = new THREE.PlaneGeometry(5000, 5000, 1000, 1000);
-        const textureLoader = new THREE.TextureLoader();
-        textureLoader.setPath("../../asset/terrain/");
-
-        textureLoader.load("grass_texture.png", texture => {
-            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set(50, 50);
-
-            textureLoader.load("terrain_texture.png", dispTexture => {
-                dispTexture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-                dispTexture.repeat.set(1, 1);
-
-                const groundMat = new THREE.MeshStandardMaterial({
-                    color: 0xffffff,
-                    map: texture,
-                    displacementMap: dispTexture,
-                    displacementScale: 200,
-                });
-
-                const groundMesh = new THREE.Mesh(groundGeo, groundMat);
-                groundMesh.rotation.x = -Math.PI / 2;
-                groundMesh.position.y = -3;
-                groundMesh.receiveShadow = true;
-                this.scene.add(groundMesh);
-
-            }, undefined, err => {
-                console.error('An error occurred loading the displacement texture:', err);
-            });
-
-        }, undefined, err => {
-            console.error('An error occurred loading the diffuse texture:', err);
-        });
-    }
-
-    initEventListeners() {
-        document.addEventListener('keydown', (event) => {
-            this.keyDisplayQueue.down(event.key);
-            if (event.shiftKey && this.characterControls) {
-                this.characterControls.switchRunToggle();
-            } else {
-                this.keysPressed[event.code] = true;
-                if (event.code === 'KeyF') {
-                    this.toggleMode('fly');
-                } else if (event.code === 'KeyG') {
-                    this.toggleMode('walk');
-                }
-            }
-        }, false);
-
-        document.addEventListener('keyup', (event) => {
-            this.keyDisplayQueue.up(event.key);
-            console.log(`Key up: ${event.key} (code: ${event.code})`);
-            this.keysPressed[event.code] = false;
-        }, false);
     }
 
     toggleMode(mode) {
-        if (mode === 'fly') {
-            this.isFlying = true;
-            this.flyControls.lock();
-            this.orbitControls.enabled = false;
-        } else if (mode === 'walk') {
-            this.isFlying = false;
-            this.flyControls.unlock();
-            this.orbitControls.enabled = true;
-        }
+        toggleMode(this, mode);
     }
 
     handleFlyControls(delta) {
-        const fly = new THREE.Vector3();
-        console.log(this.keysPressed['KeyW']);
-        if (this.keysPressed['KeyW']) fly.z += 5000.0 * delta;
-        if (this.keysPressed['KeyS']) fly.z -= 5000.0 * delta;
-        if (this.keysPressed['KeyA']) fly.x += 5000.0 * delta;
-        if (this.keysPressed['KeyD']) fly.x -= 5000.0 * delta;
-        if (this.keysPressed['Space']) fly.y += 5000.0 * delta;
-        if (this.keysPressed['Shift']) fly.y -= 5000 * delta;
-
-        this.flyControls.getObject().translateX(fly.x * delta);
-        this.flyControls.getObject().translateY(fly.y * delta);
-        this.flyControls.getObject().translateZ(fly.z * delta);
+        handleFlyControls(this, delta);
     }
 
     setDayMode() {
@@ -297,13 +180,38 @@ export class Environment {
         this.light.setAmbientLightIntensity(0.8);
         this.light.setHemisphericLightIntensity(0.6);
         this.light.setHemisphericLightColors(0x87CEEB, 0x444444);
+
+        if (this.fireflyClusters && this.fireflyClusters.length > 0) {
+            // Remove all firefly clusters from the scene
+            this.fireflyClusters.forEach(cluster => {
+                cluster.forEach(firefly => {
+                    // Ensure firefly has a mesh property and it's added to the scene
+                    if (firefly.mesh && firefly.mesh.parent === this.scene) {
+                        this.scene.remove(firefly.circle); // Remove from scene
+                    }
+                });
+            });
+            this.fireflyClusters = []; // Clear the array
+        }
     }
+
 
     setNightMode() {
         this.scene.background = new THREE.Color(0x000000);
         this.light.setAmbientLightIntensity(0.1);
         this.light.setHemisphericLightIntensity(0.2);
         this.light.setHemisphericLightColors(0x000000, 0x080808);
+
+        // Generate Fireflies
+        for (let i = 0; i < 5; i++) {
+            const clusterPosition = new THREE.Vector3(
+                Math.random() * 300 - 100,   // Random x position within a range
+                Math.random() * 10,     // Random y position within a range
+                Math.random() * 300 - 100    // Random z position within a range
+            );
+            const fireflyCluster = generateFireflyCluster(this.scene, 10, 0xffff00, clusterPosition);
+            this.fireflyClusters.push(fireflyCluster);
+        }
     }
 
 }
