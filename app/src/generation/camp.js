@@ -81,7 +81,7 @@ export class Camp {
         mesh.receiveShadow = true;
     
         this.light = new Light(this.scene);
-        this.light.createPointLight(1, 0, 0.2); // (intensity, decay, distance)
+        this.light.createPointLight(0.2, 0, 0.2); // (intensity, decay, distance)
         mesh.add(this.light.pointLight);
         mesh.position.set(this.position.x-23, this.position.y-5, this.position.z+18);
     }    

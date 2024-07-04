@@ -212,10 +212,11 @@ export class Environment {
     }
 
     setDayMode() {
-        this.scene.background = new THREE.Color(0x87CEEB);
+        // this.scene.background = new THREE.Color(0x87CEEB);
         this.scene.fog = new THREE.Fog(0x87ceeb, 100, 1000);
         this.light.setAmbientLightIntensity(0.8);
-        // this.light.setHemisphericLightIntensity(0.6);
+        this.light.setHemisphericLightIntensity(0.6);
+        this.light.setDirectionalLightIntensity(1);
         // this.light.setHemisphericLightColors(0x87CEEB, 0x444444);
         this.scene.background = skyboxTexture;
 
@@ -231,7 +232,6 @@ export class Environment {
             });
             this.fireflyClusters = []; // Clear the array
         }
-        this.light.setDirectionalLightIntensity(1);
     }
 
 
@@ -240,16 +240,16 @@ export class Environment {
         this.scene.background = nightSkyboxTexture;
         this.scene.fog = new THREE.Fog(0x000000, 100, 1000);
         this.light.setAmbientLightIntensity(0.1);
-        this.light.setHemisphericLightIntensity(0.001);
-        this.light.setHemisphericLightColors(0x000000, 0x080808);
+        this.light.setHemisphericLightIntensity(0.01);
+        this.light.setDirectionalLightIntensity(0.1);
+        // this.light.setHemisphericLightColors(0x000000, 0x080808);
 
         // Generate Fireflies
 
 
-        this.light.setDirectionalLightIntensity(0.01);
-        this.light.setHemisphericLightIntensity(0.2);
+        // this.light.setHemisphericLightIntensity(0.2);
         // this.light.setHemisphericLightColors(0x000000, 0x080808); //not working idk why
-        this.light.setDirectionalLightIntensity(0.5);
+        // this.light.setDirectionalLightIntensity(0.5);
     }
 
 }
