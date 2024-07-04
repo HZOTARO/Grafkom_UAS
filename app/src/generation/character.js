@@ -4,6 +4,7 @@ import { CharacterControls } from '../controls/characterControls.js'; // Adjust 
 import Ammo from 'ammo.js';
 import { FirstPersonCamera } from "../camera_control/FirstPersonCamera.js";
 import { ThirdPersonCamera } from "../camera_control/ThirdPersonCamera.js";
+import { OBB } from 'three/examples/jsm/Addons.js';
 
 export class Character {
     constructor(scene, camera, world, scale = 5, position = { x: 0, y: -2.5, z: -70 }) {
@@ -125,16 +126,20 @@ export class Character {
         this.BB.setFromCenterAndSize( new THREE.Vector3(0,2.5,0), this.scale );
         // this.BB.setFromObject( this.model );
         this.helper = new THREE.Box3Helper( this.BB, 0xffff00 );
-        this.scene.add( this.helper );
+        // this.scene.add( this.helper );
+
+        this.obb = new OBB();
+        this.obb = this.obb.fromBox3(this.BB);
+        // obb.rotation.rotate();
     }
 
     checkCollision(){
         // console.log(this.world.BB)
         this.collide = false;
         this.world.BB.forEach(box => {
-            if(this.BB.intersectsBox(box)){
+            if(this.obb.intersectsOBB(box)){
                 this.collide = true;
-                this.position.copy
+                this.position.copy(this.prevPos);
                 return;
             }
         });
@@ -227,6 +232,7 @@ export class Character {
 
             if(this.model!=null){
                 this.BB.setFromCenterAndSize(new THREE.Vector3(0,4,0).add(this.position), this.scale);
+                this.obb.fromBox3(this.BB)
                 this.helper.updateMatrixWorld(true);
                 this.checkCollision();
                 if(this.collide){

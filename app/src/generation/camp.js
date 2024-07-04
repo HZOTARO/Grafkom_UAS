@@ -3,11 +3,13 @@ import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import {GLTFLoader} from "three/addons";
 import { Light } from '../utils/lighting.js';
+import { OBB } from 'three/examples/jsm/Addons.js';
 
 
 export class Camp {
-    constructor(scene,  scale = 20, position  = {x: 0, y: 5.5, z: 0}) {
+    constructor(scene, world, scale = 20, position  = {x: 0, y: 5.5, z: 0}) {
         this.scene = scene;
+        this.world = world;
         this.position = position;
         this.scale = scale;
 
@@ -21,6 +23,8 @@ export class Camp {
             this.model.position.set(this.position.x, this.position.y, this.position.z);
 
             this.scene.add(this.model);
+
+            this.generateBB();
 
             this.campFireLight();
 
@@ -42,6 +46,29 @@ export class Camp {
             console.error('An error occurred loading the character model:', error);
             reject(error);
         });
+    }
+
+    generateBB(){
+        // this.model.userData.obb = new OBB();
+        // this.model.userData.obb.halfSize.copy( this.model.scale ).multiplyScalar( 0.5 );
+
+        const box = new THREE.Box3().setFromObject(this.model);
+        let helper = new THREE.Box3Helper(box, 0xfff000); // Choose a color for the bounding box
+        // this.scene.add(helper);
+
+        let obb = new OBB();
+        obb = obb.fromBox3(box);
+
+        // const box = new THREE.Box3();
+        // box.setFromObject(this.model, true);
+        // box.position = this.model.position;
+
+        // box.rotation.y = rotate;
+
+        // const helper = new THREE.Box3Helper( box, 0xffff00 );
+        // this.scene.add( helper );
+
+        this.world.BB.push(obb);
     }
 
     campFireLight() {

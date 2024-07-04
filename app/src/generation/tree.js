@@ -1,9 +1,11 @@
 import * as THREE from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+import { OBB } from 'three/examples/jsm/Addons.js';
 
 export class Tree {
-    constructor(scene, scale, position) {
+    constructor(scene, world, scale, position) {
         this.scene = scene;
+        this.world = world;
         this.scale = scale;
         this.position = position;
         this.loadModel();
@@ -24,20 +26,44 @@ export class Tree {
             this.mesh.scale.set(this.scale, this.scale, this.scale);
             this.mesh.position.set(this.position.x, this.position.y, this.position.z); // Menggunakan this.position.z untuk sumbu z
             this.scene.add(this.mesh);
+            this.generateBB();
         }, undefined, (error) => {
             console.error('Error loading FBX model:', error);
         });
+    }
+
+    generateBB(){
+        // this.model.userData.obb = new OBB();
+        // this.model.userData.obb.halfSize.copy( this.model.scale ).multiplyScalar( 0.5 );
+
+        const box = new THREE.Box3().setFromObject(this.mesh);
+        let helper = new THREE.Box3Helper(box, 0xfff000); // Choose a color for the bounding box
+        // this.scene.add(helper);
+
+        let obb = new OBB();
+        obb = obb.fromBox3(box);
+
+        // const box = new THREE.Box3();
+        // box.setFromObject(this.model, true);
+        // box.position = this.model.position;
+
+        // box.rotation.y = rotate;
+
+        // const helper = new THREE.Box3Helper( box, 0xffff00 );
+        // this.scene.add( helper );
+
+        this.world.BB.push(obb);
     }
 }
 
 
 
-export function generateTrees(scene, gridSize, scale) {
+export function generateTrees(scene, world, gridSize, scale) {
     const trees = [];
-    const spacing = 150; // Jarak antar pohon
-    const exclusionRadius = 100; // Radius untuk menghindari generate pohon di sekitar (0,0)
-    const centralMargin = 140; // Margin untuk menghindari garis tengah
-    const randomShift = 50; // Pergeseran acak untuk variasi
+    const spacing = 200; // Jarak antar pohon
+    const exclusionRadius = 250; // Radius untuk menghindari generate pohon di sekitar (0,0)
+    const centralMargin = 0; // Margin untuk menghindari garis tengah
+    const randomShift = 10; // Pergeseran acak untuk variasi
 
     const randomRange = (min, max) => THREE.MathUtils.randFloat(min, max);
 
@@ -62,7 +88,7 @@ export function generateTrees(scene, gridSize, scale) {
                 (Math.abs(randomX) > centralMargin) &&
                 (Math.abs(randomZ) > centralMargin)) {
                 const position = new THREE.Vector3(randomX, -2, randomZ);
-                const tree = new Tree(scene, scale, position);
+                const tree = new Tree(scene, world, scale, position);
                 trees.push(tree);
             }
         }

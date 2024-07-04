@@ -57,35 +57,35 @@ export class Environment {
         // }).catch((error) => {
         //     console.error('Failed to initialize character controls:', error);
         // });
-        this.camp = new Camp(this.scene);
-        this.platform = new Wall(this.scene, this.physicsWorld, { x: 5000, y: 3, z: 5000 }, { x: 0, y: -4.505, z: 0 });
-        this.wall1 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 1000 }, { x: 14, y: 5, z: -620 });
-        this.wall2 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 1000 }, { x: -70, y: 5, z: -620 });
-        this.wall3 = new Wall(this.scene, this.physicsWorld, { x:70, y:30, z:5}, {x:-100, y:5, z:-120});
-        this.wall4 = new Wall(this.scene, this.physicsWorld, { x:90, y:30, z:5}, {x:60, y:5, z:-120});
-        this.wall5 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 200 }, { x: -135, y: 5, z: -20 });
-        this.wall6 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 200 }, { x: 100, y: 5, z: -20 });
-        this.wall6 = new Wall(this.scene, this.physicsWorld, {x:250, y:30, z:5}, {x:-20, y:5, z:80});
-        this.campWall = new Wall(this.scene, this.physicsWorld, {x:120, y:100, z:110}, {x:15, y:0, z:-10});
+        this.camp = new Camp(this.scene, this.world);
+        // this.platform = new Wall(this.scene, this.physicsWorld, { x: 5000, y: 3, z: 5000 }, { x: 0, y: -4.505, z: 0 });
+        // this.wall1 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 1000 }, { x: 14, y: 5, z: -620 });
+        // this.wall2 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 1000 }, { x: -70, y: 5, z: -620 });
+        // this.wall3 = new Wall(this.scene, this.physicsWorld, { x:70, y:30, z:5}, {x:-100, y:5, z:-120});
+        // this.wall4 = new Wall(this.scene, this.physicsWorld, { x:90, y:30, z:5}, {x:60, y:5, z:-120});
+        // this.wall5 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 200 }, { x: -135, y: 5, z: -20 });
+        // this.wall6 = new Wall(this.scene, this.physicsWorld, { x: 5, y: 30, z: 200 }, { x: 100, y: 5, z: -20 });
+        // this.wall6 = new Wall(this.scene, this.physicsWorld, {x:250, y:30, z:5}, {x:-20, y:5, z:80});
+        // this.campWall = new Wall(this.scene, this.physicsWorld, {x:120, y:100, z:110}, {x:15, y:0, z:-10});
 
 
-        this.fence1 = new Fence(this.scene, {x:30, y:-3, z:-140}, 20, Math.PI/4);
-        this.fence2 = new Fence(this.scene, {x:80, y:-3, z:-130}, 20, Math.PI/2 + 0.05);
-        this.fence3 = new Fence(this.scene, {x:110, y:-3, z:-100}, 20, Math.PI/12);
-        this.fence4 = new Fence(this.scene, {x:110, y:-3, z:-40}, 20, Math.PI/12 -0.2);
-        this.fence5 = new Fence(this.scene, {x:110, y:-3, z:20}, 20, Math.PI/12 -0.5);
-        this.fence6 = new Fence(this.scene, {x:110, y:-3, z:80}, 20, Math.PI - 0.3);
-        this.fence7 = new Fence(this.scene, {x:50, y:-3, z:90}, 20, Math.PI/2 + 0.1);
-        this.fence8 = new Fence(this.scene, {x:-20, y:-3, z:90}, 20, Math.PI/2 - 0.05);
-        this.fence9 = new Fence(this.scene, {x:-80, y:-3, z:90}, 20, Math.PI/2 - 0.1);
-        this.fence10 = new Fence(this.scene, {x:-140, y:-3, z:80}, 20, Math.PI/4);
-        this.fence10 = new Fence(this.scene, {x:-140, y:-3, z:30}, 20, -Math.PI/12);
-        this.fence10 = new Fence(this.scene, {x:-140, y:-3, z:-40}, 20, Math.PI/24);
-        this.fence11 = new Fence(this.scene, {x:-140, y:-3, z:-100}, 20, -Math.PI/24);
-        this.fence12 = new Fence(this.scene, {x:-100, y:-3, z:-140}, 20, -Math.PI/4);
+        this.fence1 = new Fence(this.scene, this.world, {x:30, y:-3, z:-140}, 20, Math.PI/4);
+        this.fence2 = new Fence(this.scene, this.world, {x:80, y:-3, z:-130}, 20, Math.PI/2 + 0.05);
+        this.fence3 = new Fence(this.scene, this.world, {x:110, y:-3, z:-100}, 20, Math.PI/12);
+        this.fence4 = new Fence(this.scene, this.world, {x:110, y:-3, z:-40}, 20, Math.PI/12 -0.2);
+        this.fence5 = new Fence(this.scene, this.world, {x:110, y:-3, z:20}, 20, Math.PI/12 -0.5);
+        this.fence6 = new Fence(this.scene, this.world, {x:110, y:-3, z:80}, 20, Math.PI - 0.3);
+        this.fence7 = new Fence(this.scene, this.world, {x:50, y:-3, z:90}, 20, Math.PI/2 + 0.1);
+        this.fence8 = new Fence(this.scene, this.world, {x:-20, y:-3, z:90}, 20, Math.PI/2 - 0.05);
+        this.fence9 = new Fence(this.scene, this.world, {x:-80, y:-3, z:90}, 20, Math.PI/2 - 0.1);
+        this.fence10 = new Fence(this.scene, this.world, {x:-140, y:-3, z:80}, 20, Math.PI/4);
+        this.fence10 = new Fence(this.scene, this.world, {x:-140, y:-3, z:30}, 20, -Math.PI/12);
+        this.fence10 = new Fence(this.scene, this.world, {x:-140, y:-3, z:-40}, 20, Math.PI/24);
+        this.fence11 = new Fence(this.scene, this.world, {x:-140, y:-3, z:-100}, 20, -Math.PI/24);
+        this.fence12 = new Fence(this.scene, this.world, {x:-100, y:-3, z:-140}, 20, -Math.PI/4);
 
         // Harusnya 5000, tapi biar render e ga lama
-        // generateTrees(this.scene, 1000, 1);
+        generateTrees(this.scene, this.world, 1000, 1);
         generateGrass(this.scene, 400, 30);
 
         // Create multiple firefly clusters at random positions
