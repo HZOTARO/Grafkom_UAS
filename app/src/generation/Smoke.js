@@ -1,6 +1,4 @@
 import * as THREE from 'three';
-import Ammo from 'ammo.js';
-import { createRigidBody } from '../modules/Physics';
 
 export class Smoke {
     constructor(scene, size, position, opacity) {
@@ -18,9 +16,5 @@ export class Smoke {
         this.mesh.position.set(position.x, position.y, position.z);
 
         scene.add(this.mesh);
-    }
-
-    update(delta) {
-        // Add any updates to the smoke here if needed
     }
 }

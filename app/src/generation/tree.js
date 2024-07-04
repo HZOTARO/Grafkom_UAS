@@ -33,24 +33,12 @@ export class Tree {
     }
 
     generateBB(){
-        // this.model.userData.obb = new OBB();
-        // this.model.userData.obb.halfSize.copy( this.model.scale ).multiplyScalar( 0.5 );
-
         const box = new THREE.Box3().setFromObject(this.mesh);
         let helper = new THREE.Box3Helper(box, 0xfff000); // Choose a color for the bounding box
         // this.scene.add(helper);
 
         let obb = new OBB();
         obb = obb.fromBox3(box);
-
-        // const box = new THREE.Box3();
-        // box.setFromObject(this.model, true);
-        // box.position = this.model.position;
-
-        // box.rotation.y = rotate;
-
-        // const helper = new THREE.Box3Helper( box, 0xffff00 );
-        // this.scene.add( helper );
 
         this.world.BB.push(obb);
     }

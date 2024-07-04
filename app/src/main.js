@@ -4,7 +4,6 @@ let environment = null;
 
 async function init() {
     environment = new Environment();
-    // environment.animate();
 }
 
 init();

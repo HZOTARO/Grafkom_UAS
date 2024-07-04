@@ -21,18 +21,9 @@ export class ThirdPersonCamera extends CameraBase{
         this.minALPHA = -Math.PI * 0.8;
 
         this.movementSpeed = 25;
-
-        // this.raycaster = new THREE.Raycaster();
-        // this.pointer = new THREE.Vector2(0,0);
-        // this.raycaster.setFromCamera( this.pointer, this.camera );
     }
 
     updateRotate(dt){
-        // const intersects = this.raycaster.intersectObjects( this.scene.children );
-        // console.log(intersects)
-        
-        // this.distance = Math.min(...intersects);
-
         const targetPosition = new THREE.Vector3().copy(this.position);
         const position = this.camera.position;
 

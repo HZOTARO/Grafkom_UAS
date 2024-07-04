@@ -41,7 +41,7 @@ export class CameraBase{
 
         this.BB = new Box3();
         this.BB.setFromCenterAndSize( this.camera.position, this.scale );
-        // this.BB.setFromObject( this.model );
+
         this.helper = new Box3Helper( this.BB, 0xffff00 );
         // this.scene.add( this.helper );
 
@@ -64,13 +64,6 @@ export class CameraBase{
                 this.move.r = true;
                 break;
 
-            // case 'R':
-            //     this.move.u = true;
-            //     break;
-            // case 'F':
-            //     this.move.d = true;
-            //     break;
-
             default:
                 break;
         }
@@ -90,13 +83,6 @@ export class CameraBase{
             case 'D':
                 this.move.r = false;
                 break;
-
-            // case 'R':
-            //     this.move.u = false;
-            //     break;
-            // case 'F':
-            //     this.move.d = false;
-            //     break;
 
             default:
                 break;
@@ -137,7 +123,6 @@ export class CameraBase{
     }
 
     checkCollision(){
-        // console.log(this.world.BB)
         this.collide = false;
         this.world.BB.forEach(box => {
             if(this.obb.intersectsOBB(box)){
@@ -157,7 +142,6 @@ export class CameraBase{
         }
         this.updatePos(dt);
         this.updateRotate(dt);
-        // console.log(this.camera.getFocalLength())
     }
 
     updatePos(dt){
