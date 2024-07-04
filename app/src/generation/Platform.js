@@ -32,19 +32,19 @@ export class Platform {
         // scene.add(this.glassMesh);
 
         // Ammo.js Physics
-        const transform = new Ammo.btTransform();
-        transform.setIdentity();
-        transform.setOrigin(new Ammo.btVector3(0, -0.5, 0));
-        const motionState = new Ammo.btDefaultMotionState(transform);
+        // const transform = new Ammo.btTransform();
+        // transform.setIdentity();
+        // transform.setOrigin(new Ammo.btVector3(0, -0.5, 0));
+        // const motionState = new Ammo.btDefaultMotionState(transform);
 
-        const colShape = new Ammo.btBoxShape(new Ammo.btVector3(10, 0.5, 10));
-        const localInertia = new Ammo.btVector3(0, 0, 0);
-        colShape.calculateLocalInertia(0, localInertia);
+        // const colShape = new Ammo.btBoxShape(new Ammo.btVector3(10, 0.5, 10));
+        // const localInertia = new Ammo.btVector3(0, 0, 0);
+        // colShape.calculateLocalInertia(0, localInertia);
 
-        const rbInfo = new Ammo.btRigidBodyConstructionInfo(0, motionState, colShape, localInertia);
-        this.body = new Ammo.btRigidBody(rbInfo);
+        // const rbInfo = new Ammo.btRigidBodyConstructionInfo(0, motionState, colShape, localInertia);
+        // this.body = new Ammo.btRigidBody(rbInfo);
 
-        physicsWorld.addRigidBody(this.body);
+        // physicsWorld.addRigidBody(this.body);
     }
 
     update(delta) {

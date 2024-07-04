@@ -6,8 +6,9 @@ import { FirstPersonCamera } from "../camera_control/FirstPersonCamera.js";
 import { ThirdPersonCamera } from "../camera_control/ThirdPersonCamera.js";
 
 export class Character {
-    constructor(scene, camera, orbitControls, physicsWorld, scale = 5, position = { x: 0, y: -2.5, z: -70 }, rotationY = Math.PI) {
+    constructor(scene, camera, world, scale = 5, position = { x: 0, y: -2.5, z: -70 }) {
         this.init_idle = false;
+        this.world = world;
         this.scene = scene;
         this.camera = camera;
         this.state = 'Idle';
@@ -15,11 +16,15 @@ export class Character {
         this.dir = new THREE.Vector3(0,0,-1);
         this.animations = {};
         this.mixer = null;
-
+        this.collide = true;
+        
         this.position = new THREE.Vector3(position.x, position.y, position.z);
-        this.physicsWorld = physicsWorld;
+        this.prevPos =  new THREE.Vector3(0,0,0);
+
+        this.scale = new THREE.Vector3(5,8,5);
+        // this.physicsWorld = physicsWorld;
         // this.orbitControls = orbitControls;
-        this.initInput(); // Initialize input events
+        // this.initInput(); // Initialize input events
 
         this.loadModel();
 
@@ -59,41 +64,43 @@ export class Character {
         //     });
         // });
 
-        this.cameraControl = new ThirdPersonCamera(this.camera, this.position);
+        this.cameraControl = new ThirdPersonCamera(this.camera, this.position, this.scene);
+        this.cameraControl.movementSpeed = 25;
+        this.cameraControl.rotationSpeed = 0.5;
 
-        const transform = new Ammo.btTransform();
-        transform.setIdentity();
-        transform.setOrigin(new Ammo.btVector3(this.position.x, this.position.y, this.position.z));
-        const motionState = new Ammo.btDefaultMotionState(transform);
+        // const transform = new Ammo.btTransform();
+        // transform.setIdentity();
+        // transform.setOrigin(new Ammo.btVector3(this.position.x, this.position.y, this.position.z));
+        // const motionState = new Ammo.btDefaultMotionState(transform);
 
-        const colShape = new Ammo.btBoxShape(new Ammo.btVector3(5, 0.5, 5));
-        colShape.setMargin(0.05);
-        const localInertia = new Ammo.btVector3(0, 0, 0);
-        colShape.calculateLocalInertia(1, localInertia);
+        // const colShape = new Ammo.btBoxShape(new Ammo.btVector3(5, 0.5, 5));
+        // colShape.setMargin(0.05);
+        // const localInertia = new Ammo.btVector3(0, 0, 0);
+        // colShape.calculateLocalInertia(1, localInertia);
 
-        const rbInfo = new Ammo.btRigidBodyConstructionInfo(1, motionState, colShape, localInertia);
-        rbInfo.set_m_linearSleepingThreshold(0); // Set sleep threshold to appropriate values
-        rbInfo.set_m_angularSleepingThreshold(0); // Set sleep threshold to appropriate values
-        this.body = new Ammo.btRigidBody(rbInfo);
+        // const rbInfo = new Ammo.btRigidBodyConstructionInfo(1, motionState, colShape, localInertia);
+        // rbInfo.set_m_linearSleepingThreshold(0); // Set sleep threshold to appropriate values
+        // rbInfo.set_m_angularSleepingThreshold(0); // Set sleep threshold to appropriate values
+        // this.body = new Ammo.btRigidBody(rbInfo);
 
-        this.body.setDamping(0.0, 0.0); // Set linear and angular damping
+        // this.body.setDamping(0.0, 0.0); // Set linear and angular damping
 
         // Set the character as a kinematic object to prevent falling
-        this.body.setActivationState(Ammo.btCollisionObject.DISABLE_DEACTIVATION);
-        this.body.setCollisionFlags(this.body.getCollisionFlags() | Ammo.btCollisionObject.CF_KINEMATIC_OBJECT);
+        // this.body.setActivationState(Ammo.btCollisionObject.DISABLE_DEACTIVATION);
+        // this.body.setCollisionFlags(this.body.getCollisionFlags() | Ammo.btCollisionObject.CF_KINEMATIC_OBJECT);
 
-        physicsWorld.addRigidBody(this.body);
+        // physicsWorld.addRigidBody(this.body);
 
-        this.input = {
-            forward: false,
-            backward: false,
-            left: false,
-            right: false,
-            jump: false,
-        };
+        // this.input = {
+        //     forward: false,
+        //     backward: false,
+        //     left: false,
+        //     right: false,
+        //     jump: false,
+        // };
 
-        this.velocity = new Ammo.btVector3(0, 0, 0);
-        this.direction = new THREE.Vector3();
+        // this.velocity = new Ammo.btVector3(0, 0, 0);
+        // this.direction = new THREE.Vector3();
     }
 
     loadModel(){
@@ -114,12 +121,31 @@ export class Character {
                 this.animations.set(a.name, this.mixer.clipAction(a));
             });
         })
+        this.BB = new THREE.Box3();
+        this.BB.setFromCenterAndSize( new THREE.Vector3(0,2.5,0), this.scale );
+        // this.BB.setFromObject( this.model );
+        this.helper = new THREE.Box3Helper( this.BB, 0xffff00 );
+        this.scene.add( this.helper );
+    }
+
+    checkCollision(){
+        // console.log(this.world.BB)
+        this.collide = false;
+        this.world.BB.forEach(box => {
+            if(this.BB.intersectsBox(box)){
+                this.collide = true;
+                this.position.copy
+                return;
+            }
+        });
     }
 
     onKeyPressed(e){
         switch (e.key.toUpperCase()) {
             case 'T':
-                this.cameraControl = new ThirdPersonCamera( this.camera, this.position );
+                this.cameraControl = new ThirdPersonCamera( this.camera, this.position, this.scene );
+                this.cameraControl.movementSpeed = 25;
+                this.cameraControl.rotationSpeed = 0.5;
                 this.thirdPerson = true;
                 break;
                 
@@ -138,51 +164,51 @@ export class Character {
 
     initInput() {
         document.addEventListener('keydown', (event) => {
-            switch (event.code) {
-                case 'ArrowUp':
-                case 'KeyS':
-                    this.input.forward = true;
-                    break;
-                case 'ArrowDown':
-                case 'KeyW':
-                    this.input.backward = true;
-                    break;
-                case 'ArrowLeft':
-                case 'KeyD':
-                    this.input.left = true;
-                    break;
-                case 'ArrowRight':
-                case 'KeyA':
-                    this.input.right = true;
-                    break;
-                case 'Space':
-                    this.input.jump = true;
-                    break;
-            }
+            // switch (event.code) {
+            //     case 'ArrowUp':
+            //     case 'KeyS':
+            //         this.input.forward = true;
+            //         break;
+            //     case 'ArrowDown':
+            //     case 'KeyW':
+            //         this.input.backward = true;
+            //         break;
+            //     case 'ArrowLeft':
+            //     case 'KeyD':
+            //         this.input.left = true;
+            //         break;
+            //     case 'ArrowRight':
+            //     case 'KeyA':
+            //         this.input.right = true;
+            //         break;
+            //     case 'Space':
+            //         this.input.jump = true;
+            //         break;
+            // }
         });
 
         document.addEventListener('keyup', (event) => {
-            switch (event.code) {
-                case 'ArrowUp':
-                case 'KeyS':
-                    this.input.forward = false;
-                    break;
-                case 'ArrowDown':
-                case 'KeyW':
-                    this.input.backward = false;
-                    break;
-                case 'ArrowLeft':
-                case 'KeyD':
-                    this.input.left = false;
-                    break;
-                case 'ArrowRight':
-                case 'KeyA':
-                    this.input.right = false;
-                    break;
-                case 'Space':
-                    this.input.jump = false;
-                    break;
-            }
+            // switch (event.code) {
+            //     case 'ArrowUp':
+            //     case 'KeyS':
+            //         this.input.forward = false;
+            //         break;
+            //     case 'ArrowDown':
+            //     case 'KeyW':
+            //         this.input.backward = false;
+            //         break;
+            //     case 'ArrowLeft':
+            //     case 'KeyD':
+            //         this.input.left = false;
+            //         break;
+            //     case 'ArrowRight':
+            //     case 'KeyA':
+            //         this.input.right = false;
+            //         break;
+            //     case 'Space':
+            //         this.input.jump = false;
+            //         break;
+            // }
         });
     }
 
@@ -196,10 +222,22 @@ export class Character {
     }
     
     update(dt) {
+        this.prevPos.copy(this.position);
         this.cameraControl.update(dt);
+
             if(this.model!=null){
+                this.BB.setFromCenterAndSize(new THREE.Vector3(0,4,0).add(this.position), this.scale);
+                this.helper.updateMatrixWorld(true);
+                this.checkCollision();
+                if(this.collide){
+                    this.cameraControl.position.copy(this.prevPos);
+                }
+
                 if(this.thirdPerson){
-                    if(!this.init_idle) this.animations.get('Poses').play();
+                    if(!this.init_idle) {
+                        this.animations.get('Poses').play();
+                        this.init_idle = true;
+                    }
                     if(this.state != 'Idle' && this.cameraControl.idle){
                         this.animations.get('Walk').fadeOut(1);
                         this.animations.get('Poses').fadeIn(1).play();

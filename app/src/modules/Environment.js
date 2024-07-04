@@ -23,8 +23,10 @@ import {handleFlyControls} from "../utils/flycontrolhandler.js";
 
 export class Environment {
     constructor() {
+        this.world = {};
+        this.world.BB = [];
         this.keysPressed = {};
-        this.keyDisplayQueue = new KeyDisplay();
+        // this.keyDisplayQueue = new KeyDisplay();
         this.characterControls = null;
         this.isFlying = false;
         this.flyControls = null;
@@ -33,22 +35,22 @@ export class Environment {
 
         this.scene = scene;
         this.camera = camera;
-        setupPhysicalWorld();
-        this.physicsWorld = physicsWorld;
+        // setupPhysicalWorld();
+        // this.physicsWorld = physicsWorld;
 
         this.setupRenderer();
         this.setupControls();
         this.setupLighting();
-        createButtons(this);
+        // createButtons(this);
 
         this.runGeneration();
-        initEventListeners(this);
+        // initEventListeners(this);
         this.animate();
     }
 
     runGeneration() {
         createGround(this.scene); // Use createGround function from Ground.js
-        this.character = new Character(this.scene, this.camera, this.orbitControls, this.physicsWorld);
+        this.character = new Character(this.scene, this.camera, this.world);
         // this.character.characterControlsPromise.then((controls) => {
         //     this.characterControls = controls;
         //     console.log('CharacterControls initialized', this.characterControls);
@@ -106,7 +108,7 @@ export class Environment {
         // };
 
         if (this.physicsWorld) {
-            this.physicsWorld.stepSimulation(delta, 10);
+            // this.physicsWorld.stepSimulation(delta, 10);
         }
 
         // if (this.isFlying) {
@@ -144,21 +146,27 @@ export class Environment {
     }
 
     setupControls() {
-        this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
-        this.orbitControls.enableDamping = true;
-        this.orbitControls.dampingFactor = 0.05;
-        this.orbitControls.minDistance = 10;
-        this.orbitControls.maxDistance = 20;
-        this.orbitControls.enablePan = false;
-        this.orbitControls.maxPolarAngle = Math.PI / 2 - 0.05;
-        this.orbitControls.minPolarAngle = Math.PI / 6;
-        this.orbitControls.update();
-
-        this.flyControls = new PointerLockControls(this.camera, document.body);
+        const controls = new PointerLockControls( camera, document.body );
 
         document.addEventListener('click', () => {
-            this.flyControls.lock();
+            controls.lock();
         });
+
+        // this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
+        // this.orbitControls.enableDamping = true;
+        // this.orbitControls.dampingFactor = 0.05;
+        // this.orbitControls.minDistance = 10;
+        // this.orbitControls.maxDistance = 20;
+        // this.orbitControls.enablePan = false;
+        // this.orbitControls.maxPolarAngle = Math.PI / 2 - 0.05;
+        // this.orbitControls.minPolarAngle = Math.PI / 6;
+        // this.orbitControls.update();
+
+        // this.flyControls = new PointerLockControls(this.camera, document.body);
+
+        // document.addEventListener('click', () => {
+        //     this.flyControls.lock();
+        // });
     }
 
     setupLighting() {
@@ -170,11 +178,11 @@ export class Environment {
         this.scene.add(this.light.hemisphericLight);
         this.scene.add(this.light.directionalLight);
 
-        const helper = new THREE.DirectionalLightHelper(this.light.directionalLight, 10);
-        this.scene.add(helper);
+        // const helper = new THREE.DirectionalLightHelper(this.light.directionalLight, 10);
+        // this.scene.add(helper);
 
-        const shadowCameraHelper = new THREE.CameraHelper(this.light.directionalLight.shadow.camera);
-        this.scene.add(shadowCameraHelper);
+        // const shadowCameraHelper = new THREE.CameraHelper(this.light.directionalLight.shadow.camera);
+        // this.scene.add(shadowCameraHelper);
     }
 
 
@@ -183,7 +191,7 @@ export class Environment {
     }
 
     handleFlyControls(delta) {
-        handleFlyControls(this, delta);
+        // handleFlyControls(this, delta);
     }
 
     setDayMode() {

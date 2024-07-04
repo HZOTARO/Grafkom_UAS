@@ -1,11 +1,12 @@
-import { Vector3 } from "three";
+import * as THREE from "three";
 import { CameraBase } from "./CameraBase";
 
 export class ThirdPersonCamera extends CameraBase{
-    constructor(camera, pos){
+    constructor(camera, pos, scene){
         super(camera, pos);
+        this.scene = scene;
 
-        this.offset = new Vector3(0,10,0);
+        this.offset = new THREE.Vector3(0,10,0);
 
         this.distance = 25;
         this.ALPHA = -Math.PI * 0.75;
@@ -16,10 +17,19 @@ export class ThirdPersonCamera extends CameraBase{
 
         this.maxALPHA = -Math.PI * 0.3;
         this.minALPHA = -Math.PI * 0.8;
+
+        // this.raycaster = new THREE.Raycaster();
+        // this.pointer = new THREE.Vector2(0,0);
+        // this.raycaster.setFromCamera( this.pointer, this.camera );
     }
 
     updateRotate(dt){
-        const targetPosition = new Vector3().copy(this.position);
+        // const intersects = this.raycaster.intersectObjects( this.scene.children );
+        // console.log(intersects)
+        
+        // this.distance = Math.min(...intersects);
+
+        const targetPosition = new THREE.Vector3().copy(this.position);
         const position = this.camera.position;
 
         targetPosition.add(this.offset);

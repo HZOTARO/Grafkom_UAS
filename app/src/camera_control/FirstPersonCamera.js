@@ -16,6 +16,21 @@ export class FirstPersonCamera extends CameraBase{
         this.maxALPHA = -Math.PI * 0.25;
         this.minALPHA = -Math.PI * 0.75;
         this.roll = 0;
+        this.roll_dir = 0;
+        this.mouseDown = false;
+        
+        document.addEventListener("mousedown", (e) => this.onMouseDown(e), false);
+        document.addEventListener("mouseup", (e) => this.onMouseUp(e), false);
+    }
+    
+    onMouseDown(e){
+        this.mouseDown = true;
+        this.roll_dir += e.button - 1;
+    }
+
+    onMouseUp(e){
+        this.mouseDown = false;
+        this.roll_dir = 0;
     }
 
     updateRotate(dt){
@@ -25,8 +40,9 @@ export class FirstPersonCamera extends CameraBase{
         targetPosition.setFromSphericalCoords( 1, this.ALPHA, this.THETA ).add( position );
         
         this.camera.lookAt( targetPosition );
-        // this.roll+=0.1;
-        // this.camera.rotateZ(this.roll);
+        if(this.mouseDown){this.roll -= this.roll_dir*0.2;}
+        this.roll*=0.8;
+        this.camera.rotateZ(this.roll);
     }
 
     updatePos(dt){

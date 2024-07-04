@@ -3,7 +3,7 @@ import { Environment } from './scene/environtment';
 import { Player } from './player/Player';
 
 var scene, camera, renderer, player, cameraControl;
-var environment;
+var environment, world;
 
 const clock = new THREE.Clock();
 
@@ -16,8 +16,11 @@ function init(){
     renderer.setAnimationLoop( animate );
     document.body.appendChild( renderer.domElement );
 
+    world = {};
+    world.BB = [];
+
         //Ambient Light
-        var ambientLight = new THREE.AmbientLight(0x8888FF,100);
+        var ambientLight = new THREE.AmbientLight(0x8888FF,10);
         scene.add(ambientLight);
 
         //Directional Light
@@ -37,8 +40,8 @@ function init(){
     
         scene.add(directionalLight.target);
 
-    environment = new Environment(scene);
-    player = new Player(scene, camera);
+    environment = new Environment(scene, world);
+    player = new Player(scene, camera, world);
 
     window.addEventListener( 'resize', onWindowResize );
     }

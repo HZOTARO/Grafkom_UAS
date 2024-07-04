@@ -21,9 +21,9 @@ export class Wall {
         this.mesh.visible = false;
         scene.add(this.mesh);
 
-        let wallShape = new Ammo.btBoxShape(new Ammo.btVector3(size.x / 2, size.y / 2, size.z / 2));
-        wallShape.setMargin(0.1);
-        createRigidBody(physicsWorld, this.mesh, wallShape, 0, this.mesh.position, this.mesh.quaternion, scene);
+        // let wallShape = new Ammo.btBoxShape(new Ammo.btVector3(size.x / 2, size.y / 2, size.z / 2));
+        // wallShape.setMargin(0.1);
+        // createRigidBody(physicsWorld, this.mesh, wallShape, 0, this.mesh.position, this.mesh.quaternion, scene);
 
         // Ammo.js Physics
         // const transform = new Ammo.btTransform();
