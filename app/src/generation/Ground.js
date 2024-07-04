@@ -31,10 +31,10 @@ export function createGround(scene, world) {
             const box = new THREE.Box3().setFromObject(groundMesh);
             let helper = new THREE.Box3Helper(box, 0xfff000); // Choose a color for the bounding box
             scene.add(helper);
-    
+            
             let obb = new OBB();
             obb = obb.fromBox3(box);    
-
+            
             world.BB.push(obb);
 
         }, undefined, err => {

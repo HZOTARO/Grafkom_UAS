@@ -29,28 +29,7 @@ export class Character {
 
         this.cameraControl = new ThirdPersonCamera(this.camera, this.world, this.position, this.scene);
 
-
-        this.spotLight = new THREE.SpotLight(0xffffff, 1);
-        this.spotLight.position.set(this.position.x, this.position.y + 10, this.position.z);
-        this.spotLight.angle = Math.PI / 6;
-        this.spotLight.penumbra = 0.1;
-        this.spotLight.decay = 2;
-        this.spotLight.distance = 50;
-        this.spotLight.castShadow = true;
-        this.spotLight.shadow.mapSize.width = 1024;
-        this.spotLight.shadow.mapSize.height = 1024;
-        this.spotLight.shadow.bias = -0.0001;
-        this.spotLight.shadow.radius = 4;
-
-        this.scene.add(this.spotLight);
-
-        this.spotLightHelper = new THREE.SpotLightHelper(this.spotLight);
-        this.scene.add(this.spotLightHelper);
-
-        this.spotLightTarget = new THREE.Object3D();
-        this.spotLightTarget.position.set(this.position.x, this.position.y, this.position.z - 10);
-        this.scene.add(this.spotLightTarget);
-        this.spotLight.target = this.spotLightTarget;
+        this.addSpotLight();
     }
 
     loadModel(){
@@ -119,7 +98,25 @@ export class Character {
         }
     }
 
+    addSpotLight() {
+        this.spotLight = new THREE.SpotLight(0xffffff, 5000);
+        this.spotLight.position.set(this.position.x, this.position.y + 10, this.position.z);
+        this.spotLight.angle = Math.PI/8;
+        this.spotLight.penumbra = 0.1;
+        this.spotLight.decay = 2;
+        this.spotLight.distance = 1000;
 
+        this.spotLight.castShadow = true;
+        this.spotLight.shadow.mapSize.width = 1024;
+        this.spotLight.shadow.mapSize.height = 1024;
+
+        this.spotLight.target = new THREE.Object3D();
+        this.scene.add(this.spotLight.target);
+
+        this.scene.add(this.spotLight);
+        // this.scene.add(new THREE.SpotLightHelper(this.spotLight));
+        // this.scene.add(new THREE.CameraHelper(this.spotLight.shadow.camera));
+    }
     
     update(dt) {
 
@@ -162,14 +159,25 @@ export class Character {
                 }
 
                 this.cameraControl.updateCameraPos();
+                if (this.spotLight) {
+                    this.spotLight.position.set(
+                        this.model.position.x,
+                        this.model.position.y + 8,
+                        this.model.position.z
+                    );
+        
+                    const direction = new THREE.Vector3();
+                    this.model.getWorldDirection(direction);
+        
+                    this.spotLight.target.position.set(
+                        this.model.position.x + direction.x * 10,
+                        this.model.position.y + direction.y * 10 + 8,
+                        this.model.position.z + direction.z * 10
+                    );
+                    this.spotLight.target.updateMatrixWorld();
+                }
             }
 
-            if(this.model) {
-                this.spotLight.position.copy(this.model.position).add(new THREE.Vector3(0, 10, 0));
-                this.spotLightTarget.position.copy(this.model.position).add(this.dir);
-                this.spotLight.target.updateMatrixWorld();
-                this.spotLightHelper.update();
-            }
 
         }
     }

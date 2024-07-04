@@ -59,7 +59,6 @@ export function generateGrass(scene, gridSize, scale) {
                 Math.abs(randomZ) > centralMargin) {
                 const position = new THREE.Vector3(randomX, -3, randomZ);
                 const grass = new Grass(scene, position, scale, 0);
-                console.log(position.y);
                 grasses.push(grass);
             }
         }

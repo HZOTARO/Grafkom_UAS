@@ -48,7 +48,7 @@ export class FirstPersonCamera extends CameraBase{
     }
 
     updatePos(dt){
-        this.move.f = true;
+        // this.move.f = true;
         super.updatePos(dt);
 
         // this.deltaMove.y = 0;
@@ -64,6 +64,7 @@ export class FirstPersonCamera extends CameraBase{
     updateCameraPos(){
         super.updateCameraPos();
         if(this.collide){
+            console.log("yes")
             this.position.add(new Vector3(0,10,0));
             this.ALPHA = Math.min(Math.max(this.ALPHA + Math.PI * 0.1, this.ALPHA), -Math.PI * 0.4);
         }
