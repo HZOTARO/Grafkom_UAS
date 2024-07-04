@@ -99,7 +99,7 @@ export class Environment {
                 Math.random() * 300 - 100    // Random z position within a range
             );
             const fireflyCluster = generateFireflyCluster(this.scene, 10, 0xffff00, clusterPosition);
-            console.log("Fireflies generated at position:", clusterPosition);
+            // console.log("Fireflies generated at position:", clusterPosition);
             this.fireflyClusters.push(fireflyCluster);
         }
 
@@ -237,12 +237,12 @@ export class Environment {
 
     setNightMode() {
         // this.scene.background = new THREE.Color(0x000000);
+        this.scene.background = nightSkyboxTexture;
         this.scene.fog = new THREE.Fog(0x000000, 100, 1000);
         this.light.setAmbientLightIntensity(0.1);
         this.light.setHemisphericLightIntensity(0.001);
         this.light.setHemisphericLightColors(0x000000, 0x080808);
 
-        this.scene.background = nightSkyboxTexture;
         // Generate Fireflies
 
 

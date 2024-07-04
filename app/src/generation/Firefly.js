@@ -45,9 +45,9 @@ export class Firefly {
     }
 
     update() {
-        console.log('Updating firefly position before:', this.circle.rotation.z);
+        // console.log('Updating firefly position before:', this.circle.rotation.z);
         this.circle.rotation.z += this.rate;
-        console.log('Updating firefly position after:', this.circle.rotation.z);
+        // console.log('Updating firefly position after:', this.circle.rotation.z);
     }
 
 }
@@ -65,7 +65,7 @@ export function generateFireflyCluster(scene, count, color = 0xffffff, clusterPo
         firefly.circle.position.set(x, y, z);
 
         fireflies.push(firefly);
-        console.log('fireflies generated');
+        // console.log('fireflies generated');
     }
 
     return fireflies;
