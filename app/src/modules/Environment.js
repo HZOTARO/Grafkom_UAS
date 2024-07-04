@@ -220,18 +220,18 @@ export class Environment {
         // this.light.setHemisphericLightColors(0x87CEEB, 0x444444);
         this.scene.background = skyboxTexture;
 
-        if (this.fireflyClusters && this.fireflyClusters.length > 0) {
-            // Remove all firefly clusters from the scene
-            this.fireflyClusters.forEach(cluster => {
-                cluster.forEach(firefly => {
-                    // Ensure firefly has a mesh property and it's added to the scene
-                    if (firefly.mesh && firefly.mesh.parent === this.scene) {
-                        this.scene.remove(firefly.circle); // Remove from scene
-                    }
-                });
-            });
-            this.fireflyClusters = []; // Clear the array
-        }
+        // if (this.fireflyClusters && this.fireflyClusters.length > 0) {
+        //     // Remove all firefly clusters from the scene
+        //     this.fireflyClusters.forEach(cluster => {
+        //         cluster.forEach(firefly => {
+        //             // Ensure firefly has a mesh property and it's added to the scene
+        //             if (firefly.mesh && firefly.mesh.parent === this.scene) {
+        //                 this.scene.remove(firefly.circle); // Remove from scene
+        //             }
+        //         });
+        //     });
+        //     this.fireflyClusters = []; // Clear the array
+        // }
     }
 
 
@@ -241,7 +241,7 @@ export class Environment {
         this.scene.fog = new THREE.Fog(0x000000, 100, 1000);
         this.light.setAmbientLightIntensity(0.1);
         this.light.setHemisphericLightIntensity(0.01);
-        this.light.setDirectionalLightIntensity(0.1);
+        this.light.setDirectionalLightIntensity(0.2);
         // this.light.setHemisphericLightColors(0x000000, 0x080808);
 
         // Generate Fireflies

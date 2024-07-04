@@ -6,10 +6,10 @@ export class Firefly {
         this.color = color;
 
         // Create the firefly light
-        this.light = new THREE.PointLight(this.color, 0.7, 2.0);
+        this.light = new THREE.PointLight(this.color, 1, 3.0);
 
         // Create the firefly mesh
-        const geometry = new THREE.IcosahedronGeometry(0.05, 0);
+        const geometry = new THREE.IcosahedronGeometry(0.05, 1);
         const material = new THREE.MeshBasicMaterial({ color: this.color });
         this.mesh = new THREE.Mesh(geometry, material);
         this.mesh.add(this.light);
