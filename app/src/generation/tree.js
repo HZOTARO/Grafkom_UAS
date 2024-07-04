@@ -14,7 +14,7 @@ export class Tree {
     loadModel() {
         var loader = new FBXLoader();
         loader.setPath("../../asset/model/Pine_Tree/");
-        loader.load("Resource_PineTree_Group.fbx", (fbx) => {
+        loader.load("Resource_PineTree.fbx", (fbx) => {
             fbx.scale.setScalar(0.01);
             fbx.traverse(c=> {
                 if(c.isMesh) {
@@ -60,10 +60,15 @@ export class Tree {
 
 export function generateTrees(scene, world, gridSize, scale) {
     const trees = [];
-    const spacing = 200; // Jarak antar pohon
-    const exclusionRadius = 250; // Radius untuk menghindari generate pohon di sekitar (0,0)
+    // const spacing = 200; // Jarak antar pohon
+    // const exclusionRadius = 250; // Radius untuk menghindari generate pohon di sekitar (0,0)
+    // const centralMargin = 0; // Margin untuk menghindari garis tengah
+    // const randomShift = 10; // Pergeseran acak untuk variasi
+
+    const spacing = 75; // Jarak antar pohon
+    const exclusionRadius = 200; // Radius untuk menghindari generate pohon di sekitar (0,0)
     const centralMargin = 0; // Margin untuk menghindari garis tengah
-    const randomShift = 10; // Pergeseran acak untuk variasi
+    const randomShift = 125; // Pergeseran acak untuk variasi
 
     const randomRange = (min, max) => THREE.MathUtils.randFloat(min, max);
 
@@ -88,7 +93,7 @@ export function generateTrees(scene, world, gridSize, scale) {
                 (Math.abs(randomX) > centralMargin) &&
                 (Math.abs(randomZ) > centralMargin)) {
                 const position = new THREE.Vector3(randomX, -2, randomZ);
-                const tree = new Tree(scene, world, scale, position);
+                const tree = new Tree(scene, world, scale * randomRange(0.75, 1.5), position);
                 trees.push(tree);
             }
         }

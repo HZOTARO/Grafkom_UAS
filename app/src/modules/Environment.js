@@ -85,6 +85,7 @@ export class Environment {
         this.fence12 = new Fence(this.scene, this.world, {x:-100, y:-3, z:-140}, 20, -Math.PI/4);
 
         // Harusnya 5000, tapi biar render e ga lama
+        // generateTrees(this.scene, this.world, 1000, 1);
         generateTrees(this.scene, this.world, 1000, 1);
         generateGrass(this.scene, 400, 30);
 
