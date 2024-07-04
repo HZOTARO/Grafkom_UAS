@@ -120,7 +120,7 @@ export class Character {
             gltfAnimations.filter(a => a.name !== 'A-Pose').forEach((a) => {
                 this.animations.set(a.name, this.mixer.clipAction(a));
             });
-        })
+        });
         this.BB = new THREE.Box3();
         this.BB.setFromCenterAndSize( new THREE.Vector3(0,2.5,0), this.scale );
         // this.BB.setFromObject( this.model );
@@ -212,14 +212,6 @@ export class Character {
         });
     }
 
-    addSpotLight() {
-        this.light = new Light(this.scene);
-        this.light.createSpotLight({ x: 0, y: 10, z: 0 }, this.model.position, 1000, 100, Math.PI / 8, 0.1, 2);
-        
-        this.light.spotLight.target = this.model;
-        this.scene.add(this.light.spotLight.target);
-        this.light.spotLight.position.set(0, 10, 0);
-    }
     
     update(dt) {
         this.prevPos.copy(this.position);
