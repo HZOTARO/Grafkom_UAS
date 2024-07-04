@@ -141,7 +141,7 @@ export class CameraBase{
         this.world.BB.forEach(box => {
             if(this.obb.intersectsOBB(box)){
                 this.collide = true;
-                this.camera.position.copy(this.prevPos);
+                // this.camera.position.copy(this.prevPos);
                 return;
             }
         });
@@ -169,9 +169,6 @@ export class CameraBase{
         this.BB.setFromCenterAndSize(this.camera.position, this.scale);
         this.obb.fromBox3(this.BB)
         this.helper.updateMatrixWorld(true);
-        // this.checkCollision();
-        if(this.collide){
-            this.camera.position.copy(this.prevPos);
-        }
+        this.checkCollision();
     }
 }

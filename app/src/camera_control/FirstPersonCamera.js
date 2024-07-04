@@ -58,4 +58,12 @@ export class FirstPersonCamera extends CameraBase{
         const dir = new Vector3().setFromSphericalCoords( 1, this.ALPHA, this.THETA );
         this.camera.position.set(...(posAftZoom.add(dir.multiplyScalar(this.distance))));
     }
+
+    updateCameraPos(){
+        super.updateCameraPos();
+        if(this.collide){
+            this.position.add(new Vector3(0,10,0));
+            this.ALPHA = Math.min(Math.max(this.ALPHA + Math.PI * 0.1, this.ALPHA), -Math.PI * 0.4);
+        }
+    }
 }
