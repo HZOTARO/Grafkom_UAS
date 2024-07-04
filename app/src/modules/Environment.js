@@ -44,7 +44,7 @@ export class Environment {
         // createButtons(this);
 
         this.runGeneration();
-        // initEventListeners(this);
+        initEventListeners(this);
         this.animate();
     }
 
