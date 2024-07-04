@@ -66,8 +66,6 @@ export class Character {
         // });
 
         this.cameraControl = new ThirdPersonCamera(this.camera, this.world, this.position, this.scene);
-        this.cameraControl.movementSpeed = 25;
-        this.cameraControl.rotationSpeed = 0.5;
 
         // const transform = new Ammo.btTransform();
         // transform.setIdentity();
@@ -149,8 +147,6 @@ export class Character {
         switch (e.key.toUpperCase()) {
             case 'T':
                 this.cameraControl = new ThirdPersonCamera( this.camera, this.world, this.position, this.scene );
-                this.cameraControl.movementSpeed = 25;
-                this.cameraControl.rotationSpeed = 0.5;
                 this.thirdPerson = true;
                 break;
                 

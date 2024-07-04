@@ -123,7 +123,8 @@ export class CameraBase{
     }
 
     onMouseWheel(e){
-        this.distance = Math.min(Math.max(this.minZoom, (this.distance + this.zoomSpeed * (e.deltaY / 100))), this.maxZoom);
+        this.camera.setFocalLength( Math.min(Math.max(this.minZoom, (this.camera.getFocalLength() - this.zoomSpeed * (e.deltaY / 100))), this.maxZoom));
+        // this.distance = Math.min(Math.max(this.minZoom, (this.distance + this.zoomSpeed * (e.deltaY / 100))), this.maxZoom);
     }
     
     bindControl(){
@@ -156,6 +157,7 @@ export class CameraBase{
         }
         this.updatePos(dt);
         this.updateRotate(dt);
+        // console.log(this.camera.getFocalLength())
     }
 
     updatePos(dt){

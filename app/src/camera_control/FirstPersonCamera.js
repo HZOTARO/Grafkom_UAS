@@ -9,9 +9,11 @@ export class FirstPersonCamera extends CameraBase{
         this.distance = 0;
         this.ALPHA = -Math.PI/2;
 
-        this.zoomSpeed = -10;
-        this.minZoom = 0;
-        this.maxZoom = 1000;
+        this.zoomSpeed = 10;
+        // this.minZoom = 0;
+        // this.maxZoom = 1000;
+        this.minZoom = 10;
+        this.maxZoom = 70;
 
         this.maxALPHA = -Math.PI * 0.25;
         this.minALPHA = -Math.PI * 0.75;
@@ -55,8 +57,8 @@ export class FirstPersonCamera extends CameraBase{
         this.position.add(this.deltaMove);
 
         const posAftZoom = new Vector3().add(this.position);
-        const dir = new Vector3().setFromSphericalCoords( 1, this.ALPHA, this.THETA );
-        this.camera.position.set(...(posAftZoom.add(dir.multiplyScalar(this.distance))));
+        // const dir = new Vector3().setFromSphericalCoords( 1, this.ALPHA, this.THETA );
+        this.camera.position.set(...(posAftZoom));
     }
 
     updateCameraPos(){

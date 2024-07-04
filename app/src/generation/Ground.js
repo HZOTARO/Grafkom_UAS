@@ -1,7 +1,8 @@
 // Ground.js
 import * as THREE from 'three';
+import { OBB } from 'three/examples/jsm/Addons.js';
 
-export function createGround(scene) {
+export function createGround(scene, world) {
     const groundGeo = new THREE.PlaneGeometry(5000, 5000, 1000, 1000);
     const textureLoader = new THREE.TextureLoader();
     textureLoader.setPath("../../asset/terrain/");
@@ -26,6 +27,15 @@ export function createGround(scene) {
             groundMesh.position.y = -3;
             groundMesh.receiveShadow = true;
             scene.add(groundMesh);
+
+            const box = new THREE.Box3().setFromObject(groundMesh);
+            let helper = new THREE.Box3Helper(box, 0xfff000); // Choose a color for the bounding box
+            scene.add(helper);
+    
+            let obb = new OBB();
+            obb = obb.fromBox3(box);    
+
+            world.BB.push(obb);
 
         }, undefined, err => {
             console.error('An error occurred loading the displacement texture:', err);

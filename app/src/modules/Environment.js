@@ -52,7 +52,7 @@ export class Environment {
     }
 
     runGeneration() {
-        createGround(this.scene); // Use createGround function from Ground.js
+        createGround(this.scene, this.world); // Use createGround function from Ground.js
         this.character = new Character(this.scene, this.camera, this.world);
         // this.character.characterControlsPromise.then((controls) => {
         //     this.characterControls = controls;

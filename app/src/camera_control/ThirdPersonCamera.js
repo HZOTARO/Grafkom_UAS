@@ -8,12 +8,14 @@ export class ThirdPersonCamera extends CameraBase{
 
         this.offset = new THREE.Vector3(0,10,0);
 
-        this.distance = 25;
+        this.distance = 30;
         this.ALPHA = -Math.PI * 0.75;
 
-        this.zoomSpeed = 10;
-        this.minZoom = 15;
-        this.maxZoom = 100;
+        this.zoomSpeed = 2;
+        // this.minZoom = 15;
+        // this.maxZoom = 100;
+        this.minZoom = 10;
+        this.maxZoom = 60;
 
         this.maxALPHA = -Math.PI * 0.3;
         this.minALPHA = -Math.PI * 0.8;
@@ -52,7 +54,8 @@ export class ThirdPersonCamera extends CameraBase{
     updateCameraPos(){
         super.updateCameraPos();
         if(this.collide){
-            this.distance = Math.min(Math.max(this.minZoom, (this.distance - this.zoomSpeed * 0.4)), this.maxZoom);
+            this.temp_distance = Math.min(Math.max(this.minZoom, (this.distance - this.zoomSpeed * 0.4)), this.maxZoom);
+            this.camera.setFocalLength( Math.min(Math.max(this.minZoom, (this.camera.getFocalLength() + this.zoomSpeed * 1)), this.maxZoom));
         }
     }
 }
