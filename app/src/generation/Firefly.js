@@ -6,21 +6,21 @@ export class Firefly {
         this.color = color;
 
         // Create the firefly light
-        this.light = new THREE.PointLight(this.color, 0.5, 2.0);
-        
+        this.light = new THREE.PointLight(this.color, 0.7, 2.0);
+
         // Create the firefly mesh
         const geometry = new THREE.IcosahedronGeometry(0.05, 0);
         const material = new THREE.MeshBasicMaterial({ color: this.color });
         this.mesh = new THREE.Mesh(geometry, material);
         this.mesh.add(this.light);
-        
+
         // Create the glow effect
         this.glowMaterial = new THREE.MeshBasicMaterial({
             color: this.color,
             transparent: true,
             opacity: 0.15
         });
-        
+
         this.glowMeshes = [];
         [1.5, 2.5, 4, 6].forEach(scale => {
             const glowMesh = new THREE.Mesh(geometry, this.glowMaterial);
@@ -28,7 +28,7 @@ export class Firefly {
             this.mesh.add(glowMesh);
             this.glowMeshes.push(glowMesh);
         });
-        
+
         // Create the circle for movement
         this.circle = new THREE.Object3D();
         this.circle.position.y = Math.random() * 5 + 1;
@@ -37,16 +37,19 @@ export class Firefly {
         this.circle.rotation.x = THREE.MathUtils.degToRad(90);
         this.circle.rotation.y = Math.random() * Math.PI * 2;
         this.circle.add(this.mesh);
-        
+
         this.scene.add(this.circle);
-        
+
         // Animation parameters
-        this.rate = Math.random() * 0.01 + 0.005;
+        this.rate = Math.random() * 0.05 + 0.005;
     }
 
     update() {
+        console.log('Updating firefly position before:', this.circle.rotation.z);
         this.circle.rotation.z += this.rate;
+        console.log('Updating firefly position after:', this.circle.rotation.z);
     }
+
 }
 
 export function generateFireflyCluster(scene, count, color = 0xffffff, clusterPosition = new THREE.Vector3()) {
@@ -62,9 +65,8 @@ export function generateFireflyCluster(scene, count, color = 0xffffff, clusterPo
         firefly.circle.position.set(x, y, z);
 
         fireflies.push(firefly);
+        console.log('fireflies generated');
     }
 
     return fireflies;
 }
-
-

@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
 import { physicsWorld, setupPhysicalWorld } from './Physics.js';
 import { camera } from './Camera.js';
-import { scene } from './Scene.js';
+import {nightSkyboxTexture, scene, skyboxTexture} from './Scene.js';
 import { KeyDisplay } from '../utils/utils.js';
 import { Character } from '../generation/character.js';
 import { Platform } from '../generation/Platform.js';
@@ -20,6 +20,7 @@ import {createButtons} from "../utils/buttons.js";
 import {initEventListeners} from "../utils/eventlisteners.js";
 import {toggleMode} from "../utils/togglemode.js";
 import {handleFlyControls} from "../utils/flycontrolhandler.js";
+import { Smoke } from "../generation/Smoke.js";
 
 export class Environment {
     constructor() {
@@ -41,6 +42,8 @@ export class Environment {
         this.setupRenderer();
         this.setupControls();
         this.setupLighting();
+        this.setDayMode();
+        this.scene.background = skyboxTexture;
         // createButtons(this);
 
         this.runGeneration();
@@ -88,11 +91,24 @@ export class Environment {
         // generateTrees(this.scene, 1000, 1);
         generateGrass(this.scene, 400, 30);
 
-        // Create multiple firefly clusters at random positions
+        for (let i = 0; i < 5; i++) {
+            const clusterPosition = new THREE.Vector3(
+                Math.random() * 300 - 100,   // Random x position within a range
+                Math.random() * 10,     // Random y position within a range
+                Math.random() * 300 - 100    // Random z position within a range
+            );
+            const fireflyCluster = generateFireflyCluster(this.scene, 10, 0xffff00, clusterPosition);
+            console.log("Fireflies generated at position:", clusterPosition);
+            this.fireflyClusters.push(fireflyCluster);
+        }
 
 
 
-        this.fire = new Fire(this.scene, {x:0, y:5, z:60}, 5, 5, 1000);
+        this.smoke1 = new Smoke(this.scene, {x:3, y:3, z:3}, {x:-20, y:20, z:19}, 0.9);
+        this.smoke2 = new Smoke(this.scene, {x:2.5, y:3, z:3}, {x:-23, y:30, z:21}, 0.7);
+        this.smoke3 = new Smoke(this.scene, {x:2, y:3, z:3}, {x:-26, y:40, z:23}, 0.5);
+        this.smoke4 = new Smoke(this.scene, {x:1, y:3, z:3}, {x:-22, y:50, z:22}, 0.3);
+        // this.fire = new Fire(this.scene, {x:0, y:5, z:60}, 5, 5, 1000);
     }
 
     animate() {
@@ -131,7 +147,7 @@ export class Environment {
             });
         }
 
-        this.fire.update(delta);
+        // this.fire.update(delta);
 
         this.renderer.render(this.scene, this.camera);
     }
@@ -198,8 +214,9 @@ export class Environment {
         this.scene.background = new THREE.Color(0x87CEEB);
         this.scene.fog = new THREE.Fog(0x87ceeb, 100, 1000);
         this.light.setAmbientLightIntensity(0.8);
-        this.light.setHemisphericLightIntensity(0.6);
-        this.light.setHemisphericLightColors(0x87CEEB, 0x444444);
+        // this.light.setHemisphericLightIntensity(0.6);
+        // this.light.setHemisphericLightColors(0x87CEEB, 0x444444);
+        this.scene.background = skyboxTexture;
 
         if (this.fireflyClusters && this.fireflyClusters.length > 0) {
             // Remove all firefly clusters from the scene
@@ -218,23 +235,16 @@ export class Environment {
 
 
     setNightMode() {
-        this.scene.background = new THREE.Color(0x000000);
+        // this.scene.background = new THREE.Color(0x000000);
         this.scene.fog = new THREE.Fog(0x000000, 100, 1000);
         this.light.setAmbientLightIntensity(0.1);
         this.light.setHemisphericLightIntensity(0.001);
         this.light.setHemisphericLightColors(0x000000, 0x080808);
 
+        this.scene.background = nightSkyboxTexture;
         // Generate Fireflies
-        for (let i = 0; i < 5; i++) {
-            const clusterPosition = new THREE.Vector3(
-                Math.random() * 300 - 100,   // Random x position within a range
-                Math.random() * 10,     // Random y position within a range
-                Math.random() * 300 - 100    // Random z position within a range
-            );
-            const fireflyCluster = generateFireflyCluster(this.scene, 10, 0xffff00, clusterPosition);
-            console.log("fireflies generated");
-            this.fireflyClusters.push(fireflyCluster);
-        }
+
+
         this.light.setDirectionalLightIntensity(0.01);
         this.light.setHemisphericLightIntensity(0.2);
         // this.light.setHemisphericLightColors(0x000000, 0x080808); //not working idk why

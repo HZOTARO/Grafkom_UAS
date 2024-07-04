@@ -4,5 +4,8 @@ export function initEventListeners(environment) {
             console.log('hello');
             environment.setNightMode();
         }
+        else if (event.key === 'm') {
+            environment.setDayMode();
+        }
     }, false);
 }
