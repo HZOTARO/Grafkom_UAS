@@ -20,6 +20,8 @@ export class ThirdPersonCamera extends CameraBase{
         this.maxALPHA = -Math.PI * 0.3;
         this.minALPHA = -Math.PI * 0.8;
 
+        this.movementSpeed = 25;
+
         // this.raycaster = new THREE.Raycaster();
         // this.pointer = new THREE.Vector2(0,0);
         // this.raycaster.setFromCamera( this.pointer, this.camera );

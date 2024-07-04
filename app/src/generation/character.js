@@ -5,6 +5,7 @@ import Ammo from 'ammo.js';
 import { FirstPersonCamera } from "../camera_control/FirstPersonCamera.js";
 import { ThirdPersonCamera } from "../camera_control/ThirdPersonCamera.js";
 import { OBB } from 'three/examples/jsm/Addons.js';
+import { Cinematic } from '../camera_control/Cinematic.js';
 
 export class Character {
     constructor(scene, camera, world, scale = 5, position = { x: 12, y: -2.5, z: 70 }) {
@@ -157,6 +158,11 @@ export class Character {
                 this.animations.get('Poses').play();
                 this.state = 'Idle';
                 break;
+
+            // case 'C':
+            //     this.cinematic = true;
+            //     this.Cinematic = new Cinematic(this.scene, this.world, this);
+            //     break;
         
             default:
                 break;
@@ -223,6 +229,12 @@ export class Character {
     }
     
     update(dt) {
+        // if (this.cinematic) {
+        //    this.Cinematic.update(dt);
+        //    console.log("cinematic")
+            // return;
+        // }
+
         this.prevPos.copy(this.position);
         this.cameraControl.update(dt);
 
