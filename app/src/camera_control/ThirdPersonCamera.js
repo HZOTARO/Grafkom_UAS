@@ -2,8 +2,8 @@ import * as THREE from "three";
 import { CameraBase } from "./CameraBase";
 
 export class ThirdPersonCamera extends CameraBase{
-    constructor(camera, pos, scene){
-        super(camera, pos);
+    constructor(camera, world, pos, scene){
+        super(camera, world, pos);
         this.scene = scene;
 
         this.offset = new THREE.Vector3(0,10,0);

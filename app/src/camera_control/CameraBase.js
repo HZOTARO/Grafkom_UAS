@@ -1,9 +1,14 @@
-import { Euler, Vector3 } from "three";
+import { Euler, Vector3, Box3, Box3Helper } from "three";
+import { OBB } from "three/examples/jsm/Addons.js";
 
 export class CameraBase{
-    constructor(camera, pos){
+    constructor(camera, world, pos){
+        this.prevPos = new Vector3();
+        this.collide = false;
+        this.world = world;
         this.idle = true;
         this.camera = camera;
+        this.scale = new Vector3(1,1,1);
         
         this.position = pos;
         this.camera.position.set(...this.position);
@@ -33,6 +38,15 @@ export class CameraBase{
         this.minALPHA = null;
         this.maxALPHA = null;
         this.zoomSpeed = null;
+
+        this.BB = new Box3();
+        this.BB.setFromCenterAndSize( this.camera.position, this.scale );
+        // this.BB.setFromObject( this.model );
+        this.helper = new Box3Helper( this.BB, 0xffff00 );
+        // this.scene.add( this.helper );
+
+        this.obb = new OBB();
+        this.obb = this.obb.fromBox3(this.BB);
     }
 
     onKeyDown(e){
@@ -120,8 +134,21 @@ export class CameraBase{
         document.addEventListener("mousemove", (e) => this.onMouseMove(e), false);
         document.addEventListener("wheel", (e) => this.onMouseWheel(e), false);
     }
+
+    checkCollision(){
+        // console.log(this.world.BB)
+        this.collide = false;
+        this.world.BB.forEach(box => {
+            if(this.obb.intersectsOBB(box)){
+                this.collide = true;
+                this.camera.position.copy(this.prevPos);
+                return;
+            }
+        });
+    }
     
     update(dt) {
+        this.prevPos.copy(this.camera.position);
         if(this.move.f||this.move.b||this.move.l||this.move.r){
             this.idle = false;
         }else{
@@ -136,5 +163,15 @@ export class CameraBase{
         this.deltaMove.z = this.move.b * 1 + this.move.f * -1;
         this.deltaMove.y = this.move.u * 1 + this.move.d * -1;
         this.deltaMove.applyEuler(this.camera.rotation);
+    }
+
+    updateCameraPos(){
+        this.BB.setFromCenterAndSize(this.camera.position, this.scale);
+        this.obb.fromBox3(this.BB)
+        this.helper.updateMatrixWorld(true);
+        // this.checkCollision();
+        if(this.collide){
+            this.camera.position.copy(this.prevPos);
+        }
     }
 }

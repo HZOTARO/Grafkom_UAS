@@ -2,8 +2,8 @@ import { Euler, Vector3 } from "three";
 import { CameraBase } from "./CameraBase";
 
 export class FirstPersonCamera extends CameraBase{
-    constructor(camera, pos){
-        super(camera, pos);
+    constructor(camera, world, pos){
+        super(camera, world, pos);
 
         this.movementSpeed = 100
         this.distance = 0;

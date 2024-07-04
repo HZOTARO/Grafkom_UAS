@@ -7,7 +7,7 @@ import { ThirdPersonCamera } from "../camera_control/ThirdPersonCamera.js";
 import { OBB } from 'three/examples/jsm/Addons.js';
 
 export class Character {
-    constructor(scene, camera, world, scale = 5, position = { x: 0, y: -2.5, z: -70 }) {
+    constructor(scene, camera, world, scale = 5, position = { x: 12, y: -2.5, z: 70 }) {
         this.init_idle = false;
         this.world = world;
         this.scene = scene;
@@ -65,7 +65,7 @@ export class Character {
         //     });
         // });
 
-        this.cameraControl = new ThirdPersonCamera(this.camera, this.position, this.scene);
+        this.cameraControl = new ThirdPersonCamera(this.camera, this.world, this.position, this.scene);
         this.cameraControl.movementSpeed = 25;
         this.cameraControl.rotationSpeed = 0.5;
 
@@ -148,14 +148,14 @@ export class Character {
     onKeyPressed(e){
         switch (e.key.toUpperCase()) {
             case 'T':
-                this.cameraControl = new ThirdPersonCamera( this.camera, this.position, this.scene );
+                this.cameraControl = new ThirdPersonCamera( this.camera, this.world, this.position, this.scene );
                 this.cameraControl.movementSpeed = 25;
                 this.cameraControl.rotationSpeed = 0.5;
                 this.thirdPerson = true;
                 break;
                 
             case 'P':
-                this.cameraControl = new FirstPersonCamera( this.camera, new THREE.Vector3(0,30,0).add(this.position) );
+                this.cameraControl = new FirstPersonCamera( this.camera, this.world, new THREE.Vector3(0,30,0).add(this.position) );
                 this.thirdPerson = false;
                 this.mixer.stopAllAction();
                 this.animations.get('Poses').play();
@@ -264,6 +264,8 @@ export class Character {
                 if(this.mixer){
                     this.mixer.update(dt);
                 }
+
+                this.cameraControl.updateCameraPos();
             }
 
             // if (this.model != null) {
